@@ -18,7 +18,19 @@ int main( int argc, char ** argv )
 {
     RedZone::FileTemplate tpl( "/tmp/test.tpl" );
 
-    RedZone::Context cont( Json::object { { "vars", Json::array { "2", "OLOLOLOLOLO", "FUUUu" } } } );
+    std::string err;
+
+    Json json( Json::parse( R"(
+      {                                               
+         "items": [                                   
+           { "text": "Hello World!", "active": true },
+           { "text": "Foo", "active": true },         
+           { "text": "Bar", "active": false }         
+         ]                                            
+      }                                               
+       )", err ) );
+
+    RedZone::Context cont( json );
 
     tpl.render( std::cout, &cont );
 

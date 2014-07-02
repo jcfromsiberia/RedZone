@@ -40,7 +40,7 @@ IfNode::IfNode()
 Json IfNode::operandToJson( std::string const & operand, Context const * context ) const {
    // trying to convert the operands to JSON
    std::string err;
-   Json json( Json::parse( m_operands[0].c_str(), err ) );
+   Json json( Json::parse( operand.c_str(), err ) );
    if( !err.length() ) {
       return json;
    }
@@ -53,7 +53,7 @@ void IfNode::render( std::ostream & stream, Context * context ) const {
    bool execIfBranch = false;
    if( m_comparer ) {
       Json op1 = operandToJson( m_operands[0], context ),
-           op2 = operandToJson( m_operands[0], context );
+           op2 = operandToJson( m_operands[1], context );
       execIfBranch = ( op1.*m_comparer )( op2 );
    } else {
       Json op = operandToJson( m_operands[0], context );
@@ -81,7 +81,7 @@ void IfNode::processFragment( Fragment const * fragment ) {
     static const std::regex splitter( R"(\s+)" ); // FIXME: expressions might not contain spaces
     std::string clean = fragment->clean();
     std::vector< std::string > splitted;
-    std::copy( std::sregex_token_iterator( clean.begin(), clean.end(), splitter, -1 ),
+    std::copy( std::sregex_token_iterator( clean.begin() + 3 /* skipping "if " */, clean.end(), splitter, -1 ),
             std::sregex_token_iterator(), std::back_inserter( splitted ) );
     if( splitted.size() == 3 ) {
         auto found = m_comparers.find( splitted[1] );
