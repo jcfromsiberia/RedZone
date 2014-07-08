@@ -1,0 +1,12 @@
+{                                               
+   "items": [                                   
+      { "text": "Hello World!", "active": true },
+      { "text": "Foo", "active": true },         
+      { "text": "Bar", "active": false }         
+   ],
+   "numbers": {
+      "first": 5,
+      "second": 11,
+      "third": true
+   }
+}

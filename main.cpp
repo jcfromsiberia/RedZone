@@ -9,6 +9,7 @@
 #include <Template/FileTemplate.h>
 #include <Parser/ExpressionParser.h>
 
+#include <fstream>
 #include <iostream>
 #include <string>
 #include <regex>
@@ -19,28 +20,27 @@ int main( int argc, char ** argv )
 {
     RedZone::FileTemplate tpl( "test.tpl" );
 
+    std::ifstream jsonIn( "test.json" );
+    if( !jsonIn.good() ) {
+       return 1;
+    }
+
     std::string err;
 
-    Json json( Json::parse( R"(
-      {                                               
-         "items": [                                   
-           { "text": "Hello World!", "active": true },
-           { "text": "Foo", "active": true },         
-           { "text": "Bar", "active": false }         
-         ],
-         "numbers": {
-            "first": 5,
-            "second": 11,
-            "third": true
-         }                                            
-      }                                               
-       )", err ) );
+    Json json( Json::parse(
+       std::string(
+          std::istreambuf_iterator< char >( jsonIn ),
+          std::istreambuf_iterator< char >() ),
+          err ) );
+
+    if( err.length() ) {
+       std::cerr << err << std::endl;
+       return 1;
+    }
 
     RedZone::Context * cont( new RedZone::Context( json ) );
 
     tpl.render( std::cout, cont );
-
-    RedZone::ExpressionParser parser( cont );
 
     return 0;
 }
