@@ -150,7 +150,7 @@ null should be null
 | >=       | `lhs` any object | `rhs` any object | (bool) comparison of `lhs` >= `rhs`. _Calls json11::Json approperiate operator_ |
 | <=       | `lhs` any object | `rhs` any object | (bool) comparison of `lhs` <= `rhs`. _Calls json11::Json approperiate operator_ |
 | &&       | `lhs` any object | `rhs` any object | (bool) logical AND of `lhs` and `rhs` |
-| ||       | `lhs` any object | `rhs` any object | (bool) logical OR of `lhs` and `rhs` |
+| &#124;&#124; | `lhs` any object | `rhs` any object | (bool) logical OR of `lhs` and `rhs` |
 
 All operators are being executed in this order:
 
