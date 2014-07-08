@@ -9,6 +9,7 @@ set(RZ_SOURCES
     src/Context/Context.cpp
     src/Context/json11.cpp
     src/Exception/Exception.cpp
+    src/Exception/ExpressionException.cpp
     src/Exception/IOError.cpp
     src/Exception/JsonError.cpp
     src/Exception/TemplateContextError.cpp
@@ -20,6 +21,7 @@ set(RZ_SOURCES
     src/Node/Root.cpp
     src/Node/TextNode.cpp
     src/Node/Variable.cpp
+    src/Parser/ExpressionParser.cpp
     src/Parser/Fragment.cpp
     src/Parser/Parser.cpp
     src/Template/FileTemplate.cpp
@@ -30,6 +32,7 @@ set(RZ_HEADERS
     src/Context/Context.h
     src/Context/json11.hpp
     src/Exception/Exception.h
+    src/Exception/ExpressionException.h
     src/Exception/IOError.h
     src/Exception/JsonError.h
     src/Exception/TemplateContextError.h
@@ -41,6 +44,7 @@ set(RZ_HEADERS
     src/Node/Root.h
     src/Node/TextNode.h
     src/Node/Variable.h
+    src/Parser/ExpressionParser.h
     src/Parser/Fragment.h
     src/Parser/Parser.h
     src/Template/FileTemplate.h
@@ -59,4 +63,4 @@ else(BUILD_RZ_SHARED)
     message(STATUS "Building static library")
 endif(BUILD_RZ_SHARED)
 
-add_library(RedZone ${RZ_LIBRARY_TYPE} ${RZ_SOURCES} ${RZ_HEADERS})
+add_library(RedZone ${RZ_LIBRARY_TYPE} ${RZ_SOURCES})

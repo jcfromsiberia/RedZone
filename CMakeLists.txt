@@ -19,3 +19,5 @@ include_directories(${RedZone_SOURCE_DIR}/src)
 add_executable(RedZoneTest ${RZT_SOURCES} ${RZT_HEADERS})
 
 target_link_libraries(RedZoneTest RedZone)
+
+configure_file(test.tpl test.tpl COPYONLY)

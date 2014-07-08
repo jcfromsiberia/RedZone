@@ -16,8 +16,6 @@ namespace RedZone {
 class IfNode: public Node {
 public:
 
-    typedef bool ( json11::Json::*Comparer )( json11::Json const & ) const;
-
     IfNode();
 
     virtual void render( std::ostream & stream, Context * context ) const;
@@ -28,12 +26,7 @@ public:
     virtual ~IfNode();
 
 protected:
-    json11::Json operandToJson( std::string const & operand, Context const * context ) const;
-
-protected:
-    std::vector< std::string > m_operands;
-    static const std::map< std::string, Comparer > m_comparers;
-    Comparer m_comparer = nullptr;
+    std::string m_expression;
     std::vector< std::shared_ptr< Node > > m_ifNodes;
     std::vector< std::shared_ptr< Node > > m_elseNodes;
 };

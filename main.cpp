@@ -7,6 +7,7 @@
 
 #include <Context/Context.h>
 #include <Template/FileTemplate.h>
+#include <Parser/ExpressionParser.h>
 
 #include <iostream>
 #include <string>
@@ -16,7 +17,7 @@ using namespace json11;
 
 int main( int argc, char ** argv )
 {
-    RedZone::FileTemplate tpl( "/tmp/test.tpl" );
+    RedZone::FileTemplate tpl( "test.tpl" );
 
     std::string err;
 
@@ -26,13 +27,20 @@ int main( int argc, char ** argv )
            { "text": "Hello World!", "active": true },
            { "text": "Foo", "active": true },         
            { "text": "Bar", "active": false }         
-         ]                                            
+         ],
+         "numbers": {
+            "first": 5,
+            "second": 11,
+            "third": true
+         }                                            
       }                                               
        )", err ) );
 
-    RedZone::Context cont( json );
+    RedZone::Context * cont( new RedZone::Context( json ) );
 
-    tpl.render( std::cout, &cont );
+    tpl.render( std::cout, cont );
+
+    RedZone::ExpressionParser parser( cont );
 
     return 0;
 }
