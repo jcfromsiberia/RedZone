@@ -30,7 +30,7 @@ const std::map<
         > Parser::s_nodeCreators {
     { R"(^if\s+.*$)",                                 []() { return new IfNode();   } },
     { R"(^else$)",                                    []() { return new ElseNode(); } },
-    { R"(^each\s+[A-Za-z0-9\.]+\s+as\s+\w+$)",        []() { return new EachNode(); } },
+    { R"(^for\s+\w+\s+in\s+.+$)",         []() { return new EachNode(); } },
 };
 
 Parser::Parser() {
@@ -57,7 +57,7 @@ Root * Parser::loadFromStream( std::istream & stream ) const {
     split_expr = ReplaceString( split_expr, "{", "\\{" );
     split_expr = ReplaceString( split_expr, "}", "\\}" );
 
-    static const std::regex token_splitter( split_expr );
+    static std::regex const token_splitter( split_expr );
 
     std::vector< std::shared_ptr< Fragment > > fragments;
     std::string line;
@@ -65,7 +65,7 @@ Root * Parser::loadFromStream( std::istream & stream ) const {
         line += "\n";
         std::sregex_token_iterator iter(
                 line.begin(), line.end(), token_splitter, std::vector< int >{ -1, 0 } );
-        static const std::sregex_token_iterator end;
+        static std::sregex_token_iterator const end;
         for( ; iter != end; ++iter ) {
             if( !( *iter ).length() ) {
                 continue;
