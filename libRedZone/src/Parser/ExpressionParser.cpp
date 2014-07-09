@@ -294,12 +294,16 @@ Json ExpressionParser::parseRecursive( std::string expression ) const {
            std::not1( std::ptr_fun< int, int >( std::isspace ) ) ).base(), expression.end() );
 
    // perhaps that's a variable
-   try {
-      result = m_context->resolve( expression );
-      return result;
-   }
-   catch ( TemplateContextError & ) {
-      // FFFFUUUUU~!
+   static std::regex const variableRegex( R"(^[a-zA-Z][a-zA-Z0-9\.]*$)" );
+   std::smatch match;
+   if( std::regex_match( expression, match, variableRegex ) ) {
+      try {
+         result = m_context->resolve( expression );
+         return result;
+      }
+      catch ( TemplateContextError const & ) {
+         // FFFFUUUUU~!
+      }
    }
 
    // ok... then that's a complex expression, have to parse it... damn! I hate this
