@@ -14,6 +14,12 @@ Execute this shell script:
 $ git clone https://github.com/jcfromsiberia/RedZone && cd RedZone && mkdir build && cd build && cmake .. && make
 ```
 
+### Building Python extension
+You'll need the same tools with Python dev package and Cython.
+Use `-DBUILD_LANG_EXTENSION=python` flag for cmake command:
+$ cmake -DBUILD_LANG_EXTENSION=python .. && make
+You'll find built RedZone.so python module in the build dir.
+
 ## How to use?
 
 Link RedZone library to your application or library and use these following classes inside:
@@ -159,6 +165,32 @@ All operators are being executed in this order:
 3. >, <, ==, !=, <=, >=
 4. &&, ||
 
+# In Python
+Having build RedZone python module, you can use the above classes in you Python script, excepting there is no Json class -- Python dict replaces it completely.
+
+```python
+from RedZone import *
+
+with open('test.json', 'rt') as f:
+
+    context = Context({                                               
+    "items": [                                   
+	      { "text": "Hello World!", "active": True },
+	      { "text": "Foo", "active": True },         
+	      { "text": "Bar", "active": False }         
+    ],
+   "numbers": {
+	      "first": 5,
+	      "second": 11,
+	      "third": True
+    }
+    })
+    tpl = FileTemplate('test.tpl')
+
+    print tpl.render(context)
+```
+
 # In plans
 - extend template syntax with template inheritance
-- make Cython extension to use RedZone from Python.
+- ~~make Cython extension to use RedZone from Python~~
+- add install scripts
