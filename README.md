@@ -17,12 +17,39 @@ $ git clone https://github.com/jcfromsiberia/RedZone && cd RedZone && mkdir buil
 ### Building Python extension
 You'll need the same tools with Python dev package and Cython.
 Use `-DBUILD_LANG_EXTENSION=python` flag for cmake command:
+``` sh
 $ cmake -DBUILD_LANG_EXTENSION=python .. && make
+```
 You'll find built RedZone.so python module in the build dir.
 
 ## How to use?
 
+There are equivalent examples for C++ and Python.
+- [main.cpp](main.cpp)
+- [test.py](cython/test.py)
+
 Link RedZone library to your application or library and use these following classes inside:
+
+#### RedZone::Writer
+This is an abstract class for output. It has only two pure virtual methods
+- void write( std::string const & data )
+- void flush()
+
+There are obly two classes which implement this abstract class:
+##### RedZone::FileWriter
+Writes string data to file on disk. Constructor accepts a path to output file.
+
+``` cpp
+RedZone::FileWriter writer( "/tmp/out.html" );
+```
+
+##### RedZone::StringWriter
+Writes string data to in-memory string. Constructor accepts a reference to certain string.
+``` cpp
+std::string out;
+RedZone::FileWriter writer( out );
+```
+
 
 #### RedZone::Template and its derived ones
 There is only one working class `RedZone::FileTemplate` to load a template from filesystem by path for the time being.
@@ -52,10 +79,16 @@ json11::Json json( json11::Json::parse( R"(
 
 #### RedZone::Context
 Rendering context accepts json object-type instances only. You can not pass arrays or something else.
-`RedZone::Template` classes have `render` method to render the template with user context into a `stream`.
+`RedZone::Template` classes have `render` method to render the template with user context into a `stream` represented as pointer to `Writer` isntance.
 ``` cpp
 RedZone::Context context( json ); 
-tpl.render( std::cout, &context);
+tpl.renderToStream( &writer, &context);
+context.setJson( anotherJson );
+```
+
+Also they have `render` method, which returns complete rendered output. It uses `StringWriter` inside.
+``` cpp
+std::string rendered = tpl.render( &context );
 ```
 
 RedZone supports a primitive code evaluation support. It supports main expression operations like:
@@ -166,7 +199,7 @@ All operators are being executed in this order:
 4. &&, ||
 
 # In Python
-Having build RedZone python module, you can use the above classes in you Python script, excepting there is no Json class -- Python dict replaces it completely.
+Having built RedZone python module, you can use the above classes in your own Python scripts, excepting there is no Json class -- Python dict replaces it completely.
 
 ```python
 from RedZone import *
@@ -187,8 +220,9 @@ tpl = FileTemplate('test.tpl')
 
 print tpl.render(context)
 ```
+You get the same output.
 
 # In plans
 - extend template syntax with template inheritance
 - ~~make Cython extension to use RedZone from Python~~
-- add install scripts
+- add install/setup scripts
