@@ -6,6 +6,7 @@
  */
 #include "TextNode.h"
 
+#include <IO/Writer.h>
 #include <Parser/Fragment.h>
 
 namespace RedZone {
@@ -15,9 +16,9 @@ TextNode::TextNode()
 
 }
 
-void TextNode::render( std::ostream & stream, Context * context ) const {
+void TextNode::render( Writer * stream, Context * context ) const {
     (void)context;
-    stream << m_text;
+    stream->write( m_text );
 }
 
 void TextNode::processFragment( Fragment const * fragment ) {

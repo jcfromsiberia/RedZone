@@ -8,6 +8,7 @@
 #include <fstream>
 
 #include <Exception/IOError.h>
+#include <IO/FileReader.h>
 
 #include "FileTemplate.h"
 
@@ -15,11 +16,8 @@ namespace RedZone {
 
 FileTemplate::FileTemplate( std::string const & filePath )
 	: m_filePath( filePath ) {
-    std::ifstream in( filePath );
-    if( !in.good() ) {
-        throw IOError( "Can not open " + m_filePath + " file." );
-    }
-    loadFromStream( in );
+   FileReader in( filePath );
+   loadFromStream( &in );
 }
 
 FileTemplate::~FileTemplate() {

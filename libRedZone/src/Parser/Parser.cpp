@@ -12,8 +12,10 @@
 #include <stack>
 #include <utility>
 
+#include <Common.h>
 #include <Exception/Exception.h>
 #include <Exception/TemplateSyntaxError.h>
+#include <IO/Reader.h>
 #include <Node/EachNode.h>
 #include <Node/ElseNode.h>
 #include <Node/IfNode.h>
@@ -30,75 +32,60 @@ const std::map<
         > Parser::s_nodeCreators {
     { R"(^if\s+.*$)",                                 []() { return new IfNode();   } },
     { R"(^else$)",                                    []() { return new ElseNode(); } },
-    { R"(^for\s+\w+\s+in\s+.+$)",         []() { return new EachNode(); } },
+    { R"(^for\s+\w+\s+in\s+.+$)",                     []() { return new EachNode(); } },
 };
 
 Parser::Parser() {
 
 }
 
-namespace {
-    std::string ReplaceString(std::string subject, const std::string& search,
-                              const std::string& replace) {
-        size_t pos = 0;
-        while ((pos = subject.find(search, pos)) != std::string::npos) {
-             subject.replace(pos, search.length(), replace);
-             pos += replace.length();
-        }
-        return subject;
-    }
-}
+Root * Parser::loadFromStream( Reader * stream ) const {
 
-Root * Parser::loadFromStream( std::istream & stream ) const {
+   std::string split_expr = "(" VAR_START_TOKEN ".*?" VAR_END_TOKEN "|"
+         BLOCK_START_TOKEN ".*?" BLOCK_END_TOKEN ")";
 
-    std::string split_expr = "(" VAR_START_TOKEN ".*?" VAR_END_TOKEN "|"
-            BLOCK_START_TOKEN ".*?" BLOCK_END_TOKEN ")";
+   split_expr = replaceString( split_expr, "{", "\\{" );
+   split_expr = replaceString( split_expr, "}", "\\}" );
 
-    split_expr = ReplaceString( split_expr, "{", "\\{" );
-    split_expr = ReplaceString( split_expr, "}", "\\}" );
+   static std::regex const token_splitter( split_expr );
 
-    static std::regex const token_splitter( split_expr );
+   std::vector< std::shared_ptr< Fragment > > fragments;
+   std::string templateSrc = stream->readAll();
+   std::sregex_token_iterator iter(
+      templateSrc.begin(), templateSrc.end(), token_splitter, std::vector< int >{ -1, 0 } );
+   static std::sregex_token_iterator const end;
+   for( ; iter != end; ++iter ) {
+      if( !( *iter ).length() ) {
+          continue;
+      }
+      fragments.push_back( std::shared_ptr< Fragment >( new Fragment( *iter ) ) );
+   }
 
-    std::vector< std::shared_ptr< Fragment > > fragments;
-    std::string line;
-    while( std::getline( stream, line ) ) {
-        line += "\n";
-        std::sregex_token_iterator iter(
-                line.begin(), line.end(), token_splitter, std::vector< int >{ -1, 0 } );
-        static std::sregex_token_iterator const end;
-        for( ; iter != end; ++iter ) {
-            if( !( *iter ).length() ) {
-                continue;
-            }
-            fragments.push_back( std::shared_ptr< Fragment >( new Fragment( *iter ) ) );
-        }
-    }
+   Root * root( new Root() );
 
-    Root * root( new Root() );
+   std::stack< Node * > scopeStack;
+   scopeStack.push( root );
 
-    std::stack< Node * > scopeStack;
-    scopeStack.push( root );
+   for( auto fragment: fragments ) {
+      if( !scopeStack.size() ) {
+         throw Exception( "nesting issues" );
+      }
 
-    for( auto fragment: fragments ) {
-        if( !scopeStack.size() ) {
-            throw Exception( "nesting issues" );
-        }
+      auto parentScope = scopeStack.top();
+      if( fragment->type() == ElementType::CloseBlockFragment ) {
+         parentScope->exitScope();
+         scopeStack.pop();
+         continue;
+      }
 
-        auto parentScope = scopeStack.top();
-        if( fragment->type() == ElementType::CloseBlockFragment ) {
-            parentScope->exitScope();
-            scopeStack.pop();
-            continue;
-        }
-
-        auto newNode = createNode( fragment.get() );
-        parentScope->addChild( newNode );
-        if( newNode->createsScope() ) {
-            scopeStack.push( newNode );
-            newNode->enterScope();
-        }
-    }
-    return root;
+      auto newNode = createNode( fragment.get() );
+      parentScope->addChild( newNode );
+      if( newNode->createsScope() ) {
+         scopeStack.push( newNode );
+         newNode->enterScope();
+      }
+   }
+   return root;
 }
 
 Node * Parser::createNode( Fragment const * fragment ) const {

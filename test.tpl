@@ -21,3 +21,4 @@
 {{ get( numbers, "third" ) }} should be true
 {{ get( numbers, "foo" ) }} should be null
 {{ ( 2 + 2 ) * (2 + 2) }} should be 16
+{{ 2 + " + 2 = 4" }} should be 2 + 2 = 4

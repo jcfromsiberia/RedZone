@@ -8,7 +8,6 @@
 #pragma once
 
 #include <functional>
-#include <iostream>
 #include <map>
 
 #include <Export.h>
@@ -22,6 +21,7 @@ namespace RedZone {
 
 class Fragment;
 class Node;
+class Reader;
 class Root;
 
 enum class ElementType {
@@ -35,7 +35,7 @@ class RZ_API Parser {
 public:
     Parser();
 
-    Root * loadFromStream( std::istream & stream ) const;
+    Root * loadFromStream( Reader * stream ) const;
 
     virtual ~Parser();
 

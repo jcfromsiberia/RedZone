@@ -6,7 +6,6 @@
  */
 #pragma once
 
-#include <iostream>
 #include <vector>
 #include <memory>
 
@@ -17,12 +16,13 @@ namespace RedZone {
 
 class Context;
 class Fragment;
+class Writer;
 
 class RZ_API Node {
 public:
-	virtual void render( std::ostream & stream, Context * context ) const;
+	virtual void render( Writer * stream, Context * context ) const;
 
-	void renderChildren( std::ostream & stream, Context * context,
+	void renderChildren( Writer * stream, Context * context,
 	        std::vector< std::shared_ptr< Node > > children = { } ) const;
 
 	virtual void processFragment( Fragment const * fragment );

@@ -17,7 +17,7 @@ ElseNode::ElseNode()
 
 }
 
-void ElseNode::render( std::ostream &, Context * ) const {
+void ElseNode::render( Writer *, Context * ) const {
 
 }
 

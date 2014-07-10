@@ -6,6 +6,7 @@
  */
 
 #include <Context/Context.h>
+#include <IO/StringWriter.h>
 #include <Template/FileTemplate.h>
 #include <Parser/ExpressionParser.h>
 
@@ -40,7 +41,13 @@ int main( int argc, char ** argv )
 
     RedZone::Context * cont( new RedZone::Context( json ) );
 
-    tpl.render( std::cout, cont );
+    std::string outStr;
+
+    RedZone::StringWriter out( outStr );
+
+    tpl.renderToStream( &out, cont );
+
+    std::cout << outStr;
 
     return 0;
 }

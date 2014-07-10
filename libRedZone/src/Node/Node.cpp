@@ -9,9 +9,9 @@
 
 #include <algorithm>
 #include <functional>
-#include <iostream>
 
 #include <Context/Context.h>
+#include <IO/Writer.h>
 
 namespace RedZone {
 
@@ -20,18 +20,18 @@ Node::Node( bool createsScope )
 
 }
 
-void Node::render( std::ostream & stream, Context * context ) const {
-    stream << "*** NOT IMPLEMENTED ***";
+void Node::render( Writer * stream, Context * context ) const {
+    stream->write( "*** NOT IMPLEMENTED ***" );
 }
 
-void Node::renderChildren( std::ostream & stream, Context * context,
+void Node::renderChildren( Writer * stream, Context * context,
         std::vector< std::shared_ptr< Node > > children ) const {
     if( !children.size() )
         children = m_children;
     std::for_each( children.begin(), children.end(),
             std::bind( &Node::render,
                     std::placeholders::_1,
-                    std::ref( stream ), context ) );
+                    stream, context ) );
 }
 
 void Node::addChild( Node * child ) {

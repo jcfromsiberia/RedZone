@@ -29,7 +29,7 @@ IfNode::IfNode()
 
 }
 
-void IfNode::render( std::ostream & stream, Context * context ) const {
+void IfNode::render( Writer * stream, Context * context ) const {
    ExpressionParser parser( context );
    if( parser.parse( m_expression ).bool_value() ) {
       renderChildren( stream, context, m_ifNodes );

@@ -8,7 +8,6 @@
 #include "EachNode.h"
 
 #include <regex>
-#include <iostream>
 
 #include <Context/Context.h>
 #include <Exception/TemplateSyntaxError.h>
@@ -23,7 +22,7 @@ EachNode::EachNode()
    : Node( true ) {
 }
 
-void EachNode::render( std::ostream & stream, Context * context ) const {
+void EachNode::render( Writer * stream, Context * context ) const {
    ExpressionParser parser( context );
    Json container = parser.parse( m_container );
    if( !container.is_array() ) {

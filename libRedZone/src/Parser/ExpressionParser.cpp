@@ -6,12 +6,12 @@
 #include "ExpressionParser.h"
 
 #include <algorithm>
-#include <ctype.h>
 #include <math.h>
 #include <regex>
 #include <set>
 #include <vector>
 
+#include <Common.h>
 #include <Context/Context.h>
 #include <Exception/ExpressionException.h>
 #include <Exception/TemplateContextError.h>
@@ -53,12 +53,12 @@ std::vector< std::tuple< std::string, int,
          },
          { std::make_tuple( Json::NUMBER, Json::STRING ),
             []( Json const & lhs, Json const & rhs ) -> Json {
-            return Json( std::to_string( lhs.number_value() ) + rhs.string_value() );
+            return Json( dbl2str( lhs.number_value() ) + rhs.string_value() );
          }
          },
          { std::make_tuple( Json::STRING, Json::NUMBER ),
             []( Json const & lhs, Json const & rhs ) -> Json {
-            return Json( lhs.string_value() + std::to_string( rhs.number_value() ) );
+            return Json( lhs.string_value() + dbl2str( rhs.number_value() ) );
          }
          }
       };
@@ -287,11 +287,7 @@ Json ExpressionParser::parseRecursive( std::string expression ) const {
       return result;
    }
 
-   // trimming expression
-   expression.erase( expression.begin(), std::find_if( expression.begin(), expression.end(),
-           std::not1( std::ptr_fun< int, int >( std::isspace ) ) ) );
-   expression.erase( std::find_if( expression.rbegin(), expression.rend(),
-           std::not1( std::ptr_fun< int, int >( std::isspace ) ) ).base(), expression.end() );
+   trimString( expression );
 
    // perhaps that's a variable
    static std::regex const variableRegex( R"(^[a-zA-Z][a-zA-Z0-9\.]*$)" );

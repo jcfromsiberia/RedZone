@@ -6,6 +6,7 @@ project(RedZone)
 set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS} -g -ftest-coverage -fprofile-arcs")
 
 set(RZ_SOURCES
+    src/Common.cpp
     src/Context/Context.cpp
     src/Context/json11.cpp
     src/Exception/Exception.cpp
@@ -14,6 +15,12 @@ set(RZ_SOURCES
     src/Exception/JsonError.cpp
     src/Exception/TemplateContextError.cpp
     src/Exception/TemplateSyntaxError.cpp
+    src/IO/FileReader.cpp
+    src/IO/FileWriter.cpp
+    src/IO/Reader.cpp
+    src/IO/StringReader.cpp
+    src/IO/StringWriter.cpp
+    src/IO/Writer.cpp
     src/Node/IfNode.cpp
     src/Node/EachNode.cpp
     src/Node/ElseNode.cpp
@@ -29,6 +36,7 @@ set(RZ_SOURCES
 )
 
 set(RZ_HEADERS
+    src/Common.h
     src/Context/Context.h
     src/Context/json11.hpp
     src/Exception/Exception.h
@@ -37,6 +45,12 @@ set(RZ_HEADERS
     src/Exception/JsonError.h
     src/Exception/TemplateContextError.h
     src/Exception/TemplateSyntaxError.h
+    src/IO/FileReader.h
+    src/IO/FileWriter.h
+    src/IO/Reader.h
+    src/IO/StringReader.h
+    src/IO/StringWriter.h
+    src/IO/Writer.h
     src/Node/IfNode.h
     src/Node/EachNode.h
     src/Node/ElseNode.h

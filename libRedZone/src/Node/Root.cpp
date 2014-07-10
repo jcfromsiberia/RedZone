@@ -14,7 +14,7 @@ Root::Root()
 
 }
 
-void Root::render( std::ostream & stream, Context * context ) const {
+void Root::render( Writer * stream, Context * context ) const {
     renderChildren( stream, context );
 }
 

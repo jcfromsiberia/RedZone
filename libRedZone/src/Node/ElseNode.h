@@ -11,11 +11,13 @@
 
 namespace RedZone {
 
+class Writer;
+
 class ElseNode: public Node {
 public:
     ElseNode();
 
-    virtual void render( std::ostream & stream, Context * context ) const;
+    virtual void render( Writer * stream, Context * context ) const;
 
     virtual ~ElseNode();
 };
