@@ -4,8 +4,6 @@ __author__ = 'jc'
 
 from RedZone import *
 
-from RedZone import *
-
 context = Context({
     "items": [
         {"text": "Hello World!", "active": True},
