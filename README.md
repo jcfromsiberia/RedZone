@@ -171,23 +171,21 @@ Having build RedZone python module, you can use the above classes in you Python 
 ```python
 from RedZone import *
 
-with open('test.json', 'rt') as f:
+context = Context({                                               
+"items": [                                   
+      { "text": "Hello World!", "active": True },
+      { "text": "Foo", "active": True },         
+      { "text": "Bar", "active": False }         
+],
+"numbers": {
+      "first": 5,
+      "second": 11,
+      "third": True
+}
+})
+tpl = FileTemplate('test.tpl')
 
-    context = Context({                                               
-    "items": [                                   
-	      { "text": "Hello World!", "active": True },
-	      { "text": "Foo", "active": True },         
-	      { "text": "Bar", "active": False }         
-    ],
-   "numbers": {
-	      "first": 5,
-	      "second": 11,
-	      "third": True
-    }
-    })
-    tpl = FileTemplate('test.tpl')
-
-    print tpl.render(context)
+print tpl.render(context)
 ```
 
 # In plans
