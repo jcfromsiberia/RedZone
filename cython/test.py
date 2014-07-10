@@ -4,10 +4,20 @@ __author__ = 'jc'
 
 from RedZone import *
 
-with open('test.json', 'rt') as f:
-    json = eval(f.read().replace("true", "True").replace("false", "False").replace("null", "None"))
+from RedZone import *
 
-    context = Context(json)
-    tpl = FileTemplate('test.tpl')
+context = Context({
+    "items": [
+        {"text": "Hello World!", "active": True},
+        {"text": "Foo", "active": True},
+        {"text": "Bar", "active": False}
+    ],
+    "numbers": {
+        "first": 5,
+        "second": 11,
+        "third": True
+    }
+})
+tpl = FileTemplate('test.tpl')
 
-    print tpl.render(context)
+print tpl.render(context)
