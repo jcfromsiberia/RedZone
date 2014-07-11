@@ -28,229 +28,21 @@ using namespace json11;
 namespace RedZone
 {
 
-
-// A lot of copy-paste spaghetti code :-( Will refactor?
-
-// Initializing operators
-
-std::vector< std::tuple< std::string, int,
-   std::function< Json( Json const &, Json const & ) > > >
-   const ExpressionParser::s_binaryOperations {
-   std::make_tuple( "+", 2, []( Json const & lhs, Json const & rhs ) -> Json {
-      static std::map< std::tuple< Json::Type, Json::Type >,
-         std::function< Json( Json const &, Json const & ) > > const possibleOperations {
-         { std::make_tuple( Json::NUMBER, Json::NUMBER ),
-            []( Json const & lhs, Json const & rhs ) -> Json {
-            // Yes-yes, I know about implicit constructors feature
-            // but I'd rather to call explicit instead
-            return Json( lhs.number_value() + rhs.number_value() );
-         }
-         },
-         { std::make_tuple( Json::STRING, Json::STRING ),
-            []( Json const & lhs, Json const & rhs ) -> Json {
-            return Json( lhs.string_value() + rhs.string_value() );
-         }
-         },
-         { std::make_tuple( Json::NUMBER, Json::STRING ),
-            []( Json const & lhs, Json const & rhs ) -> Json {
-            return Json( dbl2str( lhs.number_value() ) + rhs.string_value() );
-         }
-         },
-         { std::make_tuple( Json::STRING, Json::NUMBER ),
-            []( Json const & lhs, Json const & rhs ) -> Json {
-            return Json( lhs.string_value() + dbl2str( rhs.number_value() ) );
-         }
-         }
-      };
-      decltype( possibleOperations )::const_iterator foundOperation;
-      if( ( foundOperation = possibleOperations.find( std::make_tuple( lhs.type(), rhs.type() ) ) ) == possibleOperations.end() ) {
-         throw Exception( "Type mismatch: can not add " + lhs.dump() + " to " + rhs.dump() );
-      }
-      return foundOperation->second( lhs, rhs );
-   } ),
-
-   std::make_tuple( "-", 2, []( Json const & lhs, Json const & rhs ) -> Json {
-      static std::map< std::tuple< Json::Type, Json::Type >,
-         std::function< Json( Json const &, Json const & ) > > const possibleOperations {
-         { std::make_tuple( Json::NUMBER, Json::NUMBER ),
-            []( Json const & lhs, Json const & rhs ) -> Json {
-            return Json( lhs.number_value() - rhs.number_value() );
-         }
-         }
-      };
-      decltype( possibleOperations )::const_iterator foundOperation;
-      if( ( foundOperation = possibleOperations.find( std::make_tuple( lhs.type(), rhs.type() ) ) ) == possibleOperations.end() ) {
-         throw Exception( "Type mismatch: can not subtract " + lhs.dump() + " from " + rhs.dump() );
-      }
-      return foundOperation->second( lhs, rhs );
-   } ),
-
-   std::make_tuple( "*", 3, []( Json const & lhs, Json const & rhs ) -> Json {
-      static std::map< std::tuple< Json::Type, Json::Type >,
-         std::function< Json( Json const &, Json const & ) > > const possibleOperations {
-         { std::make_tuple( Json::NUMBER, Json::NUMBER ),
-            []( Json const & lhs, Json const & rhs ) -> Json {
-            return Json( lhs.number_value() * rhs.number_value() );
-         }
-         },
-         { std::make_tuple( Json::STRING, Json::NUMBER ),
-            []( Json const & lhs, Json const & rhs ) -> Json {
-            std::string repeated;
-            if( rhs.number_value() < 0.f ) {
-               throw Exception( "String multiplier is negative" );
-            }
-            for( auto i = 0; i < rhs.number_value(); ++i ) {
-               repeated += lhs.string_value();
-            }
-            return Json( repeated );
-         }
-         },
-      };
-
-      decltype( possibleOperations )::const_iterator foundOperation;
-      if( ( foundOperation = possibleOperations.find( std::make_tuple( lhs.type(), rhs.type() ) ) ) == possibleOperations.end() ) {
-         throw Exception( "Type mismatch: can not multiply " + lhs.dump() + " and " + rhs.dump() );
-      }
-      return foundOperation->second( lhs, rhs );
-   } ),
-   std::make_tuple( "/", 3, []( Json const & lhs, Json const & rhs ) -> Json {
-      static std::map< std::tuple< Json::Type, Json::Type >,
-         std::function< Json( Json const &, Json const & ) > > const possibleOperations {
-         { std::make_tuple( Json::NUMBER, Json::NUMBER ),
-            []( Json const & lhs, Json const & rhs ) -> Json {
-            return Json( lhs.number_value() / rhs.number_value() );
-         }
-         }
-      };
-      decltype( possibleOperations )::const_iterator foundOperation;
-      if( ( foundOperation = possibleOperations.find( std::make_tuple( lhs.type(), rhs.type() ) ) ) == possibleOperations.end() ) {
-         throw Exception( "Type mismatch: can not divide " + lhs.dump() + " by " + rhs.dump() );
-      }
-      return foundOperation->second( lhs, rhs );
-   } ),
-   std::make_tuple( ">", 1, []( Json const & lhs, Json const & rhs ) -> Json {
-      return lhs > rhs;
-   } ),
-   std::make_tuple( "<", 1, []( Json const & lhs, Json const & rhs ) -> Json {
-      return lhs < rhs;
-   } ),
-   std::make_tuple( "==", 1, []( Json const & lhs, Json const & rhs ) -> Json {
-      return lhs == rhs;
-   } ),
-   std::make_tuple( "!=", 1, []( Json const & lhs, Json const & rhs ) -> Json {
-      return lhs != rhs;
-   } ),
-   std::make_tuple( "<=", 1, []( Json const & lhs, Json const & rhs ) -> Json {
-      return lhs <= rhs;
-   } ),
-   std::make_tuple( ">=", 1, []( Json const & lhs, Json const & rhs ) -> Json {
-      return lhs >= rhs;
-   } ),
-   std::make_tuple( "&&", 0, []( Json const & lhs, Json const & rhs ) -> Json {
-      return lhs.bool_value() && rhs.bool_value();
-   } ),
-   std::make_tuple( "||", 0, []( Json const & lhs, Json const & rhs ) -> Json {
-      return lhs.bool_value() || rhs.bool_value();
-   } )
-   // we need more gol... operators!
-};
-
-// /Initializing operators
-
-// Initializing functions
-
-std::map< std::string,
-   std::function< Json( std::vector< Json > const & ) > > const ExpressionParser::s_functions {
-   { "sin", []( std::vector< Json > const & args ) -> Json {
-      ARGS_SIZE_CHECK( 1 );
-      if( !args[ 0 ].is_number() ) {
-         throw Exception( "Function accepts only numeric arguments" );
-      }
-      return Json( ::sin( args[ 0 ].number_value() ) );
-   } },
-   { "cos", []( std::vector< Json > const & args ) -> Json {
-      ARGS_SIZE_CHECK( 1 );
-      if( !args[ 0 ].is_number() ) {
-         throw Exception( "Function accepts only numeric arguments" );
-      }
-      return Json( ::cos( args[ 0 ].number_value() ) );
-   } },
-   { "length", []( std::vector< Json > const & args ) -> Json {
-      ARGS_SIZE_CHECK( 1 );
-      Json arg = args[ 0 ];
-      if( arg.is_array() ) {
-         return Json( int( arg.array_items().size() ) );
-      } else if( arg.is_object() ) {
-         return Json( int( arg.object_items().size() ) );
-      } else if( arg.is_string() ) {
-         return Json( int( arg.string_value().size() ) );
-      } else {
-         throw Exception( "Can not calculate length of non-iterable object: " + arg.dump() );
-      }
-   } },
-   { "not", []( std::vector< Json > const & args ) -> Json {
-      ARGS_SIZE_CHECK( 1 );
-      return Json( !args[ 0 ].bool_value() );
-   } },
-   { "get", []( std::vector< Json > const & args ) -> Json {
-      ARGS_SIZE_CHECK( 2 );
-      Json container = args[ 0 ];
-      Json key = args[ 1 ];
-      Json result;
-      if( container.is_array() ) {
-         if( !key.is_number() ) {
-            throw Exception( "Key must be number, got " + key.dump() );
-         }
-         return container[ static_cast< size_t >( key.number_value() ) ];
-      } else if( container.is_object() ) {
-         if( !key.is_string() ) {
-            throw Exception( "Key must be string, got " + key.dump() );
-         }
-         return container[ key.string_value() ];
-      } else if( container.is_string() ) {
-         if( !key.is_number() ) {
-            throw Exception( "Key must be number, got " + key.dump() );
-         }
-         return Json(
-            std::string( 1, container.string_value()[ static_cast< size_t >( key.number_value() ) ] ) );
-      }
-      throw Exception( "Can not get anything from " + container.dump() );
-   } },
-   { "lower", []( std::vector< Json > const & args ) -> Json {
-      ARGS_SIZE_CHECK( 1 );
-      if( !args[ 0 ].is_string() ) {
-         throw Exception( "Can not make lower non-string objects" );
-      }
-      std::string arg = args[ 0 ].string_value();
-      std::string result;
-      std::transform( arg.begin(), arg.end(), std::back_inserter( result ), ::tolower );
-      return Json( result );
-   } },
-   { "upper", []( std::vector< Json > const & args ) -> Json {
-      ARGS_SIZE_CHECK( 1 );
-      if( !args[ 0 ].is_string() ) {
-         throw Exception( "Can not make upper non-string objects" );
-      }
-      std::string arg = args[ 0 ].string_value();
-      std::string result;
-      std::transform( arg.begin(), arg.end(), std::back_inserter( result ), ::toupper );
-      return Json( result );
-   } }
-
-   // ... and functions as well
-};
-
-// /Initializing functions
-
 ExpressionParser::ExpressionParser( Context const * context )
    : m_context( context )
 {
+   auto binaryOperators = m_context->binaryOperators();
+   for( auto i = binaryOperators.begin(); i != binaryOperators.end(); ++i ) {
+      std::string opString = std::get< 0 >( *i );
+//      std::for_each( opString.begin(), opString.end(),
+//         std::bind(
+//            static_cast< std::pair< charset::iterator, bool > ( charset::* )( const charset::value_type & ) >(
+//               &std::set< char >::insert ), &m_operatorChars, std::placeholders::_1 ) );
+      std::copy( opString.begin(), opString.end(), std::inserter( m_binaryOperatorChars, m_binaryOperatorChars.begin() ) );
+   }
 }
 
 Json ExpressionParser::parse( std::string expression ) const {
-   // removing spaces
-//   expression.erase( std::remove_if( expression.begin(), expression.end(), ::isspace ), expression.end() );
-
    {
       // validating
       // FIXME: do not count brackets between quotes
@@ -267,6 +59,7 @@ Json ExpressionParser::parse( std::string expression ) const {
          }
       }
    }
+
    Json result;
    try {
       result = parseRecursive( expression );
@@ -326,12 +119,14 @@ Json ExpressionParser::parseRecursive( std::string expression ) const {
    }
 
    // if the expression is a function call
+
+   Context::Functions const & functions = m_context->functions();
    static std::regex const funcRegex( R"(^(\w+)\s*\((.+)\)$)" );
    std::smatch funcMatch;
    if( std::regex_match( expression, funcMatch, funcRegex ) ) {
       std::string funcName = funcMatch[ 1 ];
-      decltype( s_functions )::const_iterator foundFunc;
-      if( ( foundFunc = s_functions.find( funcName ) ) == s_functions.end() ) {
+      Context::Functions::const_iterator foundFunc;
+      if( ( foundFunc = functions.find( funcName ) ) == functions.end() ) {
          throw ExpressionException( expression, "No such function: " + funcName );
       }
       std::string argsString = funcMatch[ 2 ];
@@ -383,19 +178,8 @@ Json ExpressionParser::parseRecursive( std::string expression ) const {
       return result;
    }
 
-   typedef std::set< char > charset;
-   static charset operatorChars;
-   if( !operatorChars.size() ) {
-      for( auto i = s_binaryOperations.begin(); i != s_binaryOperations.end(); ++i ) {
-         std::string opString = std::get< 0 >( *i );
-         std::for_each( opString.begin(), opString.end(),
-            std::bind(
-               static_cast< std::pair< charset::iterator, bool > ( charset::* )( const charset::value_type & ) >(
-                  &std::set< char >::insert ), &operatorChars, std::placeholders::_1 ) );
-      }
-   }
-
    // it the expression is an expression exactly...
+   Context::BinaryOperators const & binaryOperators = m_context->binaryOperators();
    for( int priority = MIN_PRIORITY; priority <= MAX_PRIORITY; ++priority ) {
       int len = expression.length(), i = 0, pcount = 0;
       bool inQuotes = false;
@@ -415,23 +199,22 @@ Json ExpressionParser::parseRecursive( std::string expression ) const {
          else if( expression[ i ] == '(' ) {
             pcount--;
          }
-         auto finder = [&]( std::tuple< std::string, int,
-            std::function< json11::Json( json11::Json const &, json11::Json const & ) > > const & opData ) {
+         auto finder = [ & ]( Context::BinaryOperators::value_type const & opData ) {
             if( priority != std::get< 1 >( opData ) )
                return false;
             std::string op = std::get< 0 >( opData );
             std::string possibleOp;
             int sensor = i;
             for( ;
-               sensor < expression.length() && operatorChars.find( expression[ sensor ] ) != operatorChars.end();
+               sensor < expression.length() && m_binaryOperatorChars.find( expression[ sensor ] ) != m_binaryOperatorChars.end();
                ++sensor ) {
                possibleOp.push_back( expression[ sensor ] );
             }
             return op == possibleOp;
          };
-         decltype( s_binaryOperations )::const_iterator opIter;
-         if( !pcount && operatorChars.find( expression[ i ] ) != operatorChars.end() &&
-            ( opIter = std::find_if( s_binaryOperations.begin(), s_binaryOperations.end(), finder ) ) != s_binaryOperations.end() ) {
+         Context::BinaryOperators::const_iterator opIter;
+         if( !pcount && m_binaryOperatorChars.find( expression[ i ] ) != m_binaryOperatorChars.end() &&
+            ( opIter = std::find_if( binaryOperators.begin(), binaryOperators.end(), finder ) ) != binaryOperators.end() ) {
             rhs = expression.substr( i + std::get< 0 >( *opIter ).length() );
             lhs = expression.substr( 0, i );
             try {

@@ -38,7 +38,7 @@ int main( int argc, char ** argv )
 
     RedZone::Context * cont( new RedZone::Context( json ) );
 
-    std::cout << tpl.render( cont );
+    std::cout << tpl.render( cont ) << std::endl;
 
     return 0;
 }

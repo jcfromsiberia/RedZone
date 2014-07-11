@@ -7,10 +7,8 @@
 #pragma once
 
 #include <functional>
-#include <map>
+#include <set>
 #include <string>
-#include <tuple>
-#include <vector>
 
 #include <Context/json11.hpp>
 #include <Export.h>
@@ -23,6 +21,8 @@ class Context;
 class RZ_API ExpressionParser
 {
 public:
+   typedef std::set< char > charset;
+
    ExpressionParser( Context const * context );
 
    json11::Json parse( std::string expression ) const;
@@ -34,11 +34,7 @@ protected:
 
 protected:
    Context const * m_context;
-
-   // TODO: move operators and functions into context
-   static std::vector< std::tuple< std::string, int,
-      std::function< json11::Json( json11::Json const &, json11::Json const & ) > > > const s_binaryOperations;
-   static std::map< std::string, std::function< json11::Json( std::vector< json11::Json > const & ) > > const s_functions;
+   charset m_binaryOperatorChars;
 };
 
 } /* namespace RedZone */

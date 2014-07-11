@@ -10,14 +10,223 @@
 #include <regex>
 #include <iostream>
 
+#include <Common.h>
 #include <Exception/JsonError.h>
 #include <Exception/TemplateContextError.h>
+
+#define ARGS_SIZE_CHECK(SIZE) if( args.size() != SIZE ) { \
+   throw Exception( "Got " + std::to_string( args.size() ) + \
+                    " arguments, expected " + std::to_string( SIZE ) ); \
+   }
 
 using namespace json11;
 
 namespace RedZone {
 
-Context::Context( std::string const & json ) {
+Context::Context()
+   : m_binaryOperations(
+      {
+         std::make_tuple( "+", 2, []( Json const & lhs, Json const & rhs ) -> Json {
+            static std::map< std::tuple< Json::Type, Json::Type >,
+               std::function< Json( Json const &, Json const & ) > > const possibleOperations {
+               { std::make_tuple( Json::NUMBER, Json::NUMBER ),
+                  []( Json const & lhs, Json const & rhs ) -> Json {
+                  // Yes-yes, I know about implicit constructors feature
+                  // but I'd rather to call explicit instead
+                  return Json( lhs.number_value() + rhs.number_value() );
+               }
+               },
+               { std::make_tuple( Json::STRING, Json::STRING ),
+                  []( Json const & lhs, Json const & rhs ) -> Json {
+                  return Json( lhs.string_value() + rhs.string_value() );
+               }
+               },
+               { std::make_tuple( Json::NUMBER, Json::STRING ),
+                  []( Json const & lhs, Json const & rhs ) -> Json {
+                  return Json( dbl2str( lhs.number_value() ) + rhs.string_value() );
+               }
+               },
+               { std::make_tuple( Json::STRING, Json::NUMBER ),
+                  []( Json const & lhs, Json const & rhs ) -> Json {
+                  return Json( lhs.string_value() + dbl2str( rhs.number_value() ) );
+               }
+               }
+            };
+            decltype( possibleOperations )::const_iterator foundOperation;
+            if( ( foundOperation = possibleOperations.find( std::make_tuple( lhs.type(), rhs.type() ) ) ) == possibleOperations.end() ) {
+               throw Exception( "Type mismatch: can not add " + lhs.dump() + " to " + rhs.dump() );
+            }
+            return foundOperation->second( lhs, rhs );
+         } ),
+
+         std::make_tuple( "-", 2, []( Json const & lhs, Json const & rhs ) -> Json {
+            static std::map< std::tuple< Json::Type, Json::Type >,
+               std::function< Json( Json const &, Json const & ) > > const possibleOperations {
+               { std::make_tuple( Json::NUMBER, Json::NUMBER ),
+                  []( Json const & lhs, Json const & rhs ) -> Json {
+                  return Json( lhs.number_value() - rhs.number_value() );
+               }
+               }
+            };
+            decltype( possibleOperations )::const_iterator foundOperation;
+            if( ( foundOperation = possibleOperations.find( std::make_tuple( lhs.type(), rhs.type() ) ) ) == possibleOperations.end() ) {
+               throw Exception( "Type mismatch: can not subtract " + lhs.dump() + " from " + rhs.dump() );
+            }
+            return foundOperation->second( lhs, rhs );
+         } ),
+
+         std::make_tuple( "*", 3, []( Json const & lhs, Json const & rhs ) -> Json {
+            static std::map< std::tuple< Json::Type, Json::Type >,
+               std::function< Json( Json const &, Json const & ) > > const possibleOperations {
+               { std::make_tuple( Json::NUMBER, Json::NUMBER ),
+                  []( Json const & lhs, Json const & rhs ) -> Json {
+                  return Json( lhs.number_value() * rhs.number_value() );
+               }
+               },
+               { std::make_tuple( Json::STRING, Json::NUMBER ),
+                  []( Json const & lhs, Json const & rhs ) -> Json {
+                  std::string repeated;
+                  if( rhs.number_value() < 0.f ) {
+                     throw Exception( "String multiplier is negative" );
+                  }
+                  for( auto i = 0; i < rhs.number_value(); ++i ) {
+                     repeated += lhs.string_value();
+                  }
+                  return Json( repeated );
+               }
+               },
+            };
+
+            decltype( possibleOperations )::const_iterator foundOperation;
+            if( ( foundOperation = possibleOperations.find( std::make_tuple( lhs.type(), rhs.type() ) ) ) == possibleOperations.end() ) {
+               throw Exception( "Type mismatch: can not multiply " + lhs.dump() + " and " + rhs.dump() );
+            }
+            return foundOperation->second( lhs, rhs );
+         } ),
+         std::make_tuple( "/", 3, []( Json const & lhs, Json const & rhs ) -> Json {
+            static std::map< std::tuple< Json::Type, Json::Type >,
+               std::function< Json( Json const &, Json const & ) > > const possibleOperations {
+               { std::make_tuple( Json::NUMBER, Json::NUMBER ),
+                  []( Json const & lhs, Json const & rhs ) -> Json {
+                  return Json( lhs.number_value() / rhs.number_value() );
+               }
+               }
+            };
+            decltype( possibleOperations )::const_iterator foundOperation;
+            if( ( foundOperation = possibleOperations.find( std::make_tuple( lhs.type(), rhs.type() ) ) ) == possibleOperations.end() ) {
+               throw Exception( "Type mismatch: can not divide " + lhs.dump() + " by " + rhs.dump() );
+            }
+            return foundOperation->second( lhs, rhs );
+         } ),
+         std::make_tuple( ">", 1, []( Json const & lhs, Json const & rhs ) -> Json {
+            return lhs > rhs;
+         } ),
+         std::make_tuple( "<", 1, []( Json const & lhs, Json const & rhs ) -> Json {
+            return lhs < rhs;
+         } ),
+         std::make_tuple( "==", 1, []( Json const & lhs, Json const & rhs ) -> Json {
+            return lhs == rhs;
+         } ),
+         std::make_tuple( "!=", 1, []( Json const & lhs, Json const & rhs ) -> Json {
+            return lhs != rhs;
+         } ),
+         std::make_tuple( "<=", 1, []( Json const & lhs, Json const & rhs ) -> Json {
+            return lhs <= rhs;
+         } ),
+         std::make_tuple( ">=", 1, []( Json const & lhs, Json const & rhs ) -> Json {
+            return lhs >= rhs;
+         } ),
+         std::make_tuple( "&&", 0, []( Json const & lhs, Json const & rhs ) -> Json {
+            return lhs.bool_value() && rhs.bool_value();
+         } ),
+         std::make_tuple( "||", 0, []( Json const & lhs, Json const & rhs ) -> Json {
+            return lhs.bool_value() || rhs.bool_value();
+         } )
+         // we need more gol... operators!
+      } )
+   , m_functions(
+      {
+         { "sin", []( std::vector< Json > const & args ) -> Json {
+            ARGS_SIZE_CHECK( 1 );
+            if( !args[ 0 ].is_number() ) {
+               throw Exception( "Function accepts only numeric arguments" );
+            }
+            return Json( ::sin( args[ 0 ].number_value() ) );
+         } },
+         { "cos", []( std::vector< Json > const & args ) -> Json {
+            ARGS_SIZE_CHECK( 1 );
+            if( !args[ 0 ].is_number() ) {
+               throw Exception( "Function accepts only numeric arguments" );
+            }
+            return Json( ::cos( args[ 0 ].number_value() ) );
+         } },
+         { "length", []( std::vector< Json > const & args ) -> Json {
+            ARGS_SIZE_CHECK( 1 );
+            Json arg = args[ 0 ];
+            if( arg.is_array() ) {
+               return Json( int( arg.array_items().size() ) );
+            } else if( arg.is_object() ) {
+               return Json( int( arg.object_items().size() ) );
+            } else if( arg.is_string() ) {
+               return Json( int( arg.string_value().size() ) );
+            } else {
+               throw Exception( "Can not calculate length of non-iterable object: " + arg.dump() );
+            }
+         } },
+         { "not", []( std::vector< Json > const & args ) -> Json {
+            ARGS_SIZE_CHECK( 1 );
+            return Json( !args[ 0 ].bool_value() );
+         } },
+         { "get", []( std::vector< Json > const & args ) -> Json {
+            ARGS_SIZE_CHECK( 2 );
+            Json container = args[ 0 ];
+            Json key = args[ 1 ];
+            Json result;
+            if( container.is_array() ) {
+               if( !key.is_number() ) {
+                  throw Exception( "Key must be number, got " + key.dump() );
+               }
+               return container[ static_cast< size_t >( key.number_value() ) ];
+            } else if( container.is_object() ) {
+               if( !key.is_string() ) {
+                  throw Exception( "Key must be string, got " + key.dump() );
+               }
+               return container[ key.string_value() ];
+            } else if( container.is_string() ) {
+               if( !key.is_number() ) {
+                  throw Exception( "Key must be number, got " + key.dump() );
+               }
+               return Json(
+                  std::string( 1, container.string_value()[ static_cast< size_t >( key.number_value() ) ] ) );
+            }
+            throw Exception( "Can not get anything from " + container.dump() );
+         } },
+         { "lower", []( std::vector< Json > const & args ) -> Json {
+            ARGS_SIZE_CHECK( 1 );
+            if( !args[ 0 ].is_string() ) {
+               throw Exception( "Can not make lower non-string objects" );
+            }
+            std::string arg = args[ 0 ].string_value();
+            std::string result;
+            std::transform( arg.begin(), arg.end(), std::back_inserter( result ), ::tolower );
+            return Json( result );
+         } },
+         { "upper", []( std::vector< Json > const & args ) -> Json {
+            ARGS_SIZE_CHECK( 1 );
+            if( !args[ 0 ].is_string() ) {
+               throw Exception( "Can not make upper non-string objects" );
+            }
+            std::string arg = args[ 0 ].string_value();
+            std::string result;
+            std::transform( arg.begin(), arg.end(), std::back_inserter( result ), ::toupper );
+            return Json( result );
+         } }
+      } ) {
+
+}
+
+Context::Context( std::string const & json )
+   : Context() {
    std::string err;
    m_json = Json::parse( json, err );
    if( err.size() ) {
@@ -29,14 +238,8 @@ Context::Context( std::string const & json ) {
 }
 
 Context::Context( json11::Json const & json )
-   : m_json( json ) {
-   if( !m_json.is_object() ) {
-      throw JsonError( "Context data must be presented in dictionary type." );
-   }
-}
-
-Context::Context( json11::Json && json )
-   : m_json( json ) {
+   : Context() {
+   m_json = json;
    if( !m_json.is_object() ) {
       throw JsonError( "Context data must be presented in dictionary type." );
    }
@@ -66,6 +269,14 @@ Json Context::resolve( std::string const & name ) const {
       result = tmp;
    }
    return result;
+}
+
+Context::BinaryOperators const & Context::binaryOperators() const {
+   return m_binaryOperations;
+}
+
+Context::Functions const & Context::functions() const {
+   return m_functions;
 }
 
 Context::~Context() {
