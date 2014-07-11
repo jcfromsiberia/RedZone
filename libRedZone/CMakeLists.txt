@@ -22,6 +22,7 @@ set(RZ_SOURCES
     src/IO/StringWriter.cpp
     src/IO/Writer.cpp
     src/Node/IfNode.cpp
+    src/Node/IncludeNode.cpp
     src/Node/EachNode.cpp
     src/Node/ElseNode.cpp
     src/Node/Node.cpp
@@ -52,6 +53,7 @@ set(RZ_HEADERS
     src/IO/StringWriter.h
     src/IO/Writer.h
     src/Node/IfNode.h
+    src/Node/IncludeNode.h
     src/Node/EachNode.h
     src/Node/ElseNode.h
     src/Node/Node.h

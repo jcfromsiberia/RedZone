@@ -9,6 +9,8 @@
 
 #include <algorithm>
 
+#include <Common.h>
+
 namespace RedZone {
 
 Fragment::Fragment( std::string const & rawText )
@@ -23,13 +25,7 @@ std::string Fragment::cleanFragment() const {
         std::string result;
         std::copy( m_rawText.begin() + 2, m_rawText.end() - 2, std::back_inserter( result ) );
 
-        // trimming result
-
-        result.erase( result.begin(), std::find_if( result.begin(), result.end(),
-                std::not1( std::ptr_fun< int, int >( std::isspace ) ) ) );
-
-        result.erase( std::find_if( result.rbegin(), result.rend(),
-                std::not1( std::ptr_fun< int, int >( std::isspace ) ) ).base(), result.end() );
+        trimString( result );
 
         return result;
     }

@@ -19,6 +19,7 @@
 #include <Node/EachNode.h>
 #include <Node/ElseNode.h>
 #include <Node/IfNode.h>
+#include <Node/IncludeNode.h>
 #include <Node/Root.h>
 #include <Node/TextNode.h>
 #include <Node/Variable.h>
@@ -33,6 +34,7 @@ const std::map<
     { R"(^if\s+.*$)",                                 []() { return new IfNode();   } },
     { R"(^else$)",                                    []() { return new ElseNode(); } },
     { R"(^for\s+\w+\s+in\s+.+$)",                     []() { return new EachNode(); } },
+    { R"(^include\s+.+$)",                            []() { return new IncludeNode(); } },
 };
 
 Parser::Parser() {

@@ -1,3 +1,4 @@
+// Testing loop and condition tags
 {% for item in items %}
     {% if item.active && length(item.text) == 3 %}
 	<div class="active">{{ item.text }}</div>
@@ -22,3 +23,10 @@
 {{ get( numbers, "foo" ) }} should be null
 {{ ( 2 + 2 ) * (2 + 2) }} should be 16
 {{ 2 + " + 2 = 4" }} should be 2 + 2 = 4
+
+// Testing include tag
+{% if true %}
+    {% include [ "inc_test.tpl" ] %}
+{% else %}
+    {% include "Fake.tpl" %} 
+{% end %}

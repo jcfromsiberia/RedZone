@@ -8,6 +8,14 @@
 #include <algorithm>
 #include <ctype.h>
 
+#if defined( __linux__ ) || defined( __APPLE__ )
+#  include <unistd.h>
+#elif defined( _WIN32 ) || defined( _WIN64 )
+#  error "Not implemented yet"
+#else
+#  error "Unknown OS"
+#endif
+
 namespace RedZone {
 
 std::string dbl2str( double d ) {
@@ -36,6 +44,10 @@ std::string replaceString( std::string subject, const std::string & search, cons
        pos += replace.length();
    }
    return subject;
+}
+
+bool isReadableFile( std::string const & filePath ) {
+   return access( filePath.c_str(), R_OK ) != -1;
 }
 
 } /* namespace RedZone */

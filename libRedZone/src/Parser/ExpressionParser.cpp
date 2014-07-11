@@ -34,10 +34,6 @@ ExpressionParser::ExpressionParser( Context const * context )
    auto binaryOperators = m_context->binaryOperators();
    for( auto i = binaryOperators.begin(); i != binaryOperators.end(); ++i ) {
       std::string opString = std::get< 0 >( *i );
-//      std::for_each( opString.begin(), opString.end(),
-//         std::bind(
-//            static_cast< std::pair< charset::iterator, bool > ( charset::* )( const charset::value_type & ) >(
-//               &std::set< char >::insert ), &m_operatorChars, std::placeholders::_1 ) );
       std::copy( opString.begin(), opString.end(), std::inserter( m_binaryOperatorChars, m_binaryOperatorChars.begin() ) );
    }
 }

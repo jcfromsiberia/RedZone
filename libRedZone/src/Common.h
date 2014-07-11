@@ -17,4 +17,6 @@ std::string replaceString( std::string subject, const std::string & search, cons
 
 void trimString( std::string & str );
 
+bool isReadableFile( std::string const & filePath );
+
 } /* namespace RedZone */
