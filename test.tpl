@@ -1,4 +1,4 @@
-// Testing loop and condition tags
+{# Testing loop and condition tags #}
 {% for item in items %}
     {% if item.active && length(item.text) == 3 %}
 	<div class="active">{{ item.text }}</div>
@@ -7,7 +7,7 @@
     {% end  %}
 {% end %}
 
-// Testing expression parser
+{# Testing expression parser #}
 {{ "f" * 8 + "u" * 8 + "~" }} should be ffffffffuuuuuuuu~
 {{upper("f"*8+"u"*8+"~")}} should be FFFFFFFFUUUUUUUU~
 {{ sin( 0 )}} should be 0
@@ -24,7 +24,7 @@
 {{ ( 2 + 2 ) * (2 + 2) }} should be 16
 {{ 2 + " + 2 = 4" }} should be 2 + 2 = 4
 
-// Testing include tag
+{# Testing include tag #}
 {% if true %}
     {% include [ "inc_test.tpl" ] %}
 {% else %}

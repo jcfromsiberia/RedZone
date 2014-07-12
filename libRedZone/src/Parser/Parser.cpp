@@ -43,18 +43,32 @@ Parser::Parser() {
 
 Root * Parser::loadFromStream( Reader * stream ) const {
 
-   std::string split_expr = "(" VAR_START_TOKEN ".*?" VAR_END_TOKEN "|"
+   static std::string commentExpr = ( []() -> std::string {
+      std::string result = "(" COMMENT_START_TOKEN ".*?" COMMENT_END_TOKEN ")";
+      result = replaceString( result, "{", "\\{" );
+      result = replaceString( result, "}", "\\}" );
+      return result;
+   } )();
+
+   static std::regex const commentMatcher( commentExpr );
+
+   static std::string splitExpr = ( []() -> std::string {
+      std::string result = "(" VAR_START_TOKEN ".*?" VAR_END_TOKEN "|"
          BLOCK_START_TOKEN ".*?" BLOCK_END_TOKEN ")";
+      splitExpr = replaceString( splitExpr, "{", "\\{" );
+      splitExpr = replaceString( splitExpr, "}", "\\}" );
+      return result;
+   } )();
 
-   split_expr = replaceString( split_expr, "{", "\\{" );
-   split_expr = replaceString( split_expr, "}", "\\}" );
-
-   static std::regex const token_splitter( split_expr );
+   static std::regex const tokenSplitter( splitExpr );
 
    std::vector< std::shared_ptr< Fragment > > fragments;
    std::string templateSrc = stream->readAll();
+
+   templateSrc = std::regex_replace( templateSrc, commentMatcher, "" );
+
    std::sregex_token_iterator iter(
-      templateSrc.begin(), templateSrc.end(), token_splitter, std::vector< int >{ -1, 0 } );
+      templateSrc.begin(), templateSrc.end(), tokenSplitter, std::vector< int >{ -1, 0 } );
    static std::sregex_token_iterator const end;
    for( ; iter != end; ++iter ) {
       if( !( *iter ).length() ) {

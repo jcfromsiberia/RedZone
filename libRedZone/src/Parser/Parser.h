@@ -12,10 +12,12 @@
 
 #include <Export.h>
 
-#define BLOCK_START_TOKEN "{%"
-#define BLOCK_END_TOKEN   "%}"
-#define VAR_START_TOKEN   "{{"
-#define VAR_END_TOKEN     "}}"
+#define BLOCK_START_TOKEN   "{%"
+#define BLOCK_END_TOKEN     "%}"
+#define VAR_START_TOKEN     "{{"
+#define VAR_END_TOKEN       "}}"
+#define COMMENT_START_TOKEN "{#"
+#define COMMENT_END_TOKEN   "#}"
 
 namespace RedZone {
 
