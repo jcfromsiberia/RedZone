@@ -19,6 +19,8 @@ public:
 
     virtual void render( Writer * stream, Context * context ) const;
 
+    virtual std::string name() const;
+
     virtual ~Root();
 };
 

@@ -16,8 +16,10 @@
 #include <Exception/Exception.h>
 #include <Exception/TemplateSyntaxError.h>
 #include <IO/Reader.h>
+#include <Node/BlockNode.h>
 #include <Node/EachNode.h>
 #include <Node/ElseNode.h>
+#include <Node/ExtendsNode.h>
 #include <Node/IfNode.h>
 #include <Node/IncludeNode.h>
 #include <Node/Root.h>
@@ -35,7 +37,11 @@ const std::map<
     { R"(^else$)",                                    []() { return new ElseNode(); } },
     { R"(^for\s+\w+\s+in\s+.+$)",                     []() { return new EachNode(); } },
     { R"(^include\s+.+$)",                            []() { return new IncludeNode(); } },
+    { R"(^block\s+\w+$)",                             []() { return new BlockNode(); } },
+    { R"(^extends\s+.+$)",                            []() { return new ExtendsNode(); } },
 };
+
+std::vector< std::string > Parser::s_paths { "./", };
 
 Parser::Parser() {
 
@@ -55,8 +61,8 @@ Root * Parser::loadFromStream( Reader * stream ) const {
    static std::string splitExpr = ( []() -> std::string {
       std::string result = "(" VAR_START_TOKEN ".*?" VAR_END_TOKEN "|"
          BLOCK_START_TOKEN ".*?" BLOCK_END_TOKEN ")";
-      splitExpr = replaceString( splitExpr, "{", "\\{" );
-      splitExpr = replaceString( splitExpr, "}", "\\}" );
+      result = replaceString( result, "{", "\\{" );
+      result = replaceString( result, "}", "\\}" );
       return result;
    } )();
 
@@ -89,7 +95,7 @@ Root * Parser::loadFromStream( Reader * stream ) const {
 
       auto parentScope = scopeStack.top();
       if( fragment->type() == ElementType::CloseBlockFragment ) {
-         parentScope->exitScope();
+         parentScope->exitScope( fragment->clean() );
          scopeStack.pop();
          continue;
       }
@@ -100,6 +106,9 @@ Root * Parser::loadFromStream( Reader * stream ) const {
          scopeStack.push( newNode );
          newNode->enterScope();
       }
+   }
+   if( scopeStack.size() > 1 ) {
+      throw Exception( "There is non-closed tag " + scopeStack.top()->name() );
    }
    return root;
 }
@@ -128,6 +137,17 @@ Node * Parser::createNode( Fragment const * fragment ) const {
     }
     node->processFragment( fragment );
     return node;
+}
+
+void Parser::addPath( std::string path ) {
+   path = replaceString( path, "\\", "/" );
+   if ( path.back() != '/' )
+      path.push_back( '/' );
+   s_paths.push_back( path );
+}
+
+std::vector< std::string > const & Parser::paths() {
+   return s_paths;
 }
 
 Parser::~Parser() {

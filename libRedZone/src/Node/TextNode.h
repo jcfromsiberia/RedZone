@@ -20,6 +20,8 @@ public:
     virtual void render( Writer * stream, Context * context ) const;
     virtual void processFragment( Fragment const * fragment );
 
+    virtual std::string name() const;
+
     virtual ~TextNode();
 
 protected:

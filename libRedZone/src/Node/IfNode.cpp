@@ -16,7 +16,6 @@
 #include <Context/Context.h>
 #include <Context/json11.hpp>
 #include <Exception/TemplateSyntaxError.h>
-#include <Node/ElseNode.h>
 #include <Parser/ExpressionParser.h>
 #include <Parser/Fragment.h>
 
@@ -38,10 +37,12 @@ void IfNode::render( Writer * stream, Context * context ) const {
    }
 }
 
-void IfNode::exitScope() {
+void IfNode::exitScope( std::string const & endTag ) {
+   if( endTag != "endif" )
+      throw TemplateSyntaxError( endTag );
    std::vector< std::shared_ptr< Node > > * current = &m_ifNodes;
    for( auto child: m_children ) {
-      if( typeid( *child ) == typeid( ElseNode ) ) { // TODO: get rid of this sh#t!
+      if( child->name() == "Else" ) {
          current = &m_elseNodes;
          continue;
       }
@@ -55,6 +56,10 @@ void IfNode::processFragment( Fragment const * fragment ) {
     m_ifNodes.clear();
     m_elseNodes.clear();
     std::copy( clean.begin() + 3, clean.end(), std::back_inserter( m_expression ) );
+}
+
+std::string IfNode::name() const {
+   return "If";
 }
 
 IfNode::~IfNode() {

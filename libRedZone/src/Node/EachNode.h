@@ -19,6 +19,8 @@ public:
 
     virtual void render( Writer * stream, Context * context ) const;
     virtual void processFragment( Fragment const * fragment );
+    virtual void exitScope( std::string const & endTag );
+    virtual std::string name() const;
 
     virtual ~EachNode();
 

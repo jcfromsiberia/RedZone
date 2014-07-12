@@ -51,6 +51,15 @@ void EachNode::processFragment( Fragment const * fragment ) {
    m_container = match[ 2 ];
 }
 
+void EachNode::exitScope( std::string const & endTag ) {
+   if( endTag != "endfor" )
+      throw TemplateSyntaxError( endTag );
+}
+
+std::string EachNode::name() const {
+   return "For";
+}
+
 EachNode::~EachNode() {
 }
 

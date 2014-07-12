@@ -23,11 +23,7 @@
 using namespace json11;
 using namespace std::placeholders;
 
-typedef std::string( *StrConcat )( std::string const &, std::string const & );
-
 namespace RedZone {
-
-std::vector< std::string > IncludeNode::s_paths { "./" };
 
 IncludeNode::IncludeNode()
    : Node( false ) {
@@ -38,20 +34,18 @@ IncludeNode::IncludeNode()
 void IncludeNode::render( Writer * stream, Context * context ) const {
    ExpressionParser exprParser( context );
    Json paths = exprParser.parse( m_includeExpr );
+   std::vector< std::string > const & allParserPaths = Parser::paths();
    std::string const wrongArgumentError =
       "Include expression \"" + m_includeExpr + "\" must be single string or array of strings.";
-   static std::string const notFoundError =
-      "Cannot find template file ";
-   static StrConcat strConcat( std::operator+ );
    auto rootCreator = [ & ]( std::string path ) -> std::shared_ptr< Root > {
-      decltype( s_paths )::const_iterator found = std::find_if( s_paths.begin(), s_paths.end(),
+      auto found = std::find_if( allParserPaths.begin(), allParserPaths.end(),
          std::bind( &isReadableFile, std::bind(
             std::function< std::string( std::string const &, std::string const & ) >( strConcat ), _1, path ) ) );
-      if( found == s_paths.end() ) {
-         throw Exception( notFoundError + path );
+      if( found == allParserPaths.end() ) {
+         throw Exception(  "Include failed. Cannot open template file " + path );
       }
       path = *found + path;
-      FileReader reader( path );
+      FileReader reader( path );  // FIXME: get rid of specific Reader creating
       static Parser parser;
       return std::shared_ptr< Root >( parser.loadFromStream( &reader ) );
    };
@@ -81,15 +75,8 @@ void IncludeNode::processFragment( Fragment const * fragment ) {
    m_includeExpr = match[ 1 ];
 }
 
-void IncludeNode::addPath( std::string path ) {
-   path = replaceString( path, "\\", "/" );
-   if ( path.back() != '/' )
-      path.push_back( '/' );
-   s_paths.push_back( path );
-}
-
-std::vector< std::string > const & IncludeNode::paths() {
-   return s_paths;
+std::string IncludeNode::name() const {
+   return "Include";
 }
 
 IncludeNode::~IncludeNode() {

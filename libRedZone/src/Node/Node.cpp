@@ -7,11 +7,10 @@
 
 #include "Node.h"
 
-#include <algorithm>
-#include <functional>
-
 #include <Context/Context.h>
 #include <IO/Writer.h>
+
+using namespace std::placeholders;
 
 namespace RedZone {
 
@@ -29,9 +28,7 @@ void Node::renderChildren( Writer * stream, Context * context,
     if( !children.size() )
         children = m_children;
     std::for_each( children.begin(), children.end(),
-            std::bind( &Node::render,
-                    std::placeholders::_1,
-                    stream, context ) );
+            std::bind( &Node::render, _1, stream, context ) );
 }
 
 void Node::addChild( Node * child ) {
@@ -50,11 +47,17 @@ void Node::processFragment( Fragment const * fragment ) {
 }
 
 void Node::enterScope() {
-
 }
 
-void Node::exitScope() {
+void Node::exitScope( std::string const & ) {
+}
 
+std::string Node::name() const {
+   return "Node";
+}
+
+std::vector< std::shared_ptr< Node > > const & Node::children() {
+   return m_children;
 }
 
 Node::~Node() {

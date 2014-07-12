@@ -48,6 +48,10 @@ void Variable::processFragment( Fragment const * fragment ) {
    m_expression = fragment->clean();
 }
 
+std::string Variable::name() const {
+   return "Variable";
+}
+
 Variable::~Variable() {
 }
 

@@ -9,6 +9,7 @@
 
 #include <functional>
 #include <map>
+#include <vector>
 
 #include <Export.h>
 
@@ -39,6 +40,9 @@ public:
 
     Root * loadFromStream( Reader * stream ) const;
 
+    static void addPath( std::string path );
+    static std::vector< std::string > const & paths();
+
     virtual ~Parser();
 
 protected:
@@ -48,6 +52,8 @@ protected:
     static const std::map<
         std::string, std::function< Node * () >
         > s_nodeCreators;
+
+    static std::vector< std::string > s_paths;
 };
 
 } /* namespace RedZone */

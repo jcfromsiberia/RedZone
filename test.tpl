@@ -1,11 +1,14 @@
+{# Testing inheritance #}
+{% extends base_test.tpl %}
+{% block mainContent %}
 {# Testing loop and condition tags #}
 {% for item in items %}
     {% if item.active && length(item.text) == 3 %}
-	<div class="active">{{ item.text }}</div>
+    <div class="active">{{ item.text }}</div>
     {% else  %}
-	<div class="inactive">{{ item.text }}</div>
-    {% end  %}
-{% end %}
+    <div class="inactive">{{ item.text }}</div>
+    {% endif %}
+{% endfor %}
 
 {# Testing expression parser #}
 {{ "f" * 8 + "u" * 8 + "~" }} should be ffffffffuuuuuuuu~
@@ -29,4 +32,9 @@
     {% include [ "inc_test.tpl" ] %}
 {% else %}
     {% include "Fake.tpl" %} 
-{% end %}
+{% endif %}
+
+{% endblock %}
+
+This text shold not be here!
+{% endextends %}

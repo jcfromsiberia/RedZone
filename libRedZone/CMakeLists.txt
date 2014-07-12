@@ -21,10 +21,12 @@ set(RZ_SOURCES
     src/IO/StringReader.cpp
     src/IO/StringWriter.cpp
     src/IO/Writer.cpp
-    src/Node/IfNode.cpp
-    src/Node/IncludeNode.cpp
+    src/Node/BlockNode.cpp
     src/Node/EachNode.cpp
     src/Node/ElseNode.cpp
+    src/Node/ExtendsNode.cpp
+    src/Node/IfNode.cpp
+    src/Node/IncludeNode.cpp
     src/Node/Node.cpp
     src/Node/Root.cpp
     src/Node/TextNode.cpp
@@ -52,10 +54,11 @@ set(RZ_HEADERS
     src/IO/StringReader.h
     src/IO/StringWriter.h
     src/IO/Writer.h
-    src/Node/IfNode.h
-    src/Node/IncludeNode.h
     src/Node/EachNode.h
     src/Node/ElseNode.h
+    src/Node/ExtendsNode.h
+    src/Node/IfNode.h
+    src/Node/IncludeNode.h
     src/Node/Node.h
     src/Node/Root.h
     src/Node/TextNode.h
@@ -67,7 +70,7 @@ set(RZ_HEADERS
     src/Template/Template.h
 )
 
-option(BUILD_RZ_SHARED "Build the RedZone library shared." ON)
+option(BUILD_RZ_SHARED "Build RedZone shared library." ON)
 
 include_directories(src)
 

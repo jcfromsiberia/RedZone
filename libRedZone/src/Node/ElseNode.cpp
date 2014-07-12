@@ -21,6 +21,10 @@ void ElseNode::render( Writer *, Context * ) const {
 
 }
 
+std::string ElseNode::name() const {
+   return "Else";
+}
+
 ElseNode::~ElseNode() {
 }
 

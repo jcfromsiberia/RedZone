@@ -18,6 +18,10 @@ void Root::render( Writer * stream, Context * context ) const {
     renderChildren( stream, context );
 }
 
+std::string Root::name() const {
+   return "Root";
+}
+
 Root::~Root() {
 }
 

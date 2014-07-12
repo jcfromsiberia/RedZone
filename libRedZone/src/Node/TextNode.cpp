@@ -25,6 +25,10 @@ void TextNode::processFragment( Fragment const * fragment ) {
     m_text = fragment->raw();
 }
 
+std::string TextNode::name() const {
+   return "Text";
+}
+
 TextNode::~TextNode() {
 }
 

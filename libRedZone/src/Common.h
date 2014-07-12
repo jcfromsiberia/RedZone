@@ -19,4 +19,7 @@ void trimString( std::string & str );
 
 bool isReadableFile( std::string const & filePath );
 
+typedef std::string( *StrConcat )( std::string const &, std::string const & );
+static StrConcat strConcat = std::operator+;
+
 } /* namespace RedZone */

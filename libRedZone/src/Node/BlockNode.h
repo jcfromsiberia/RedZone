@@ -1,34 +1,30 @@
 /*
- * IncludeNode.h
+ * BlockNode.h
  *
  *      Author: jc
  */
 
 #pragma once
 
-#include <string>
-#include <vector>
-
 #include "Node.h"
 
 namespace RedZone {
 
-class Root;
-
-class RZ_API IncludeNode : public Node {
+class BlockNode : public Node {
 public:
-   IncludeNode();
+   BlockNode();
 
    virtual void render( Writer * stream, Context * context ) const;
-
    virtual void processFragment( Fragment const * fragment );
+   virtual void exitScope( std::string const & endTag );
 
    virtual std::string name() const;
+   std::string blockName() const;
 
-   virtual ~IncludeNode();
+   virtual ~BlockNode();
 
 protected:
-   std::string m_includeExpr;
+   std::string m_blockName;
 };
 
 } /* namespace RedZone */
