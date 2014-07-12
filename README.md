@@ -223,6 +223,8 @@ print tpl.render(context)
 You get the same output.
 
 # In plans
-- extend template syntax with template inheritance
-- ~~make Cython extension to use RedZone from Python~~
+- ~~extend template syntax with template inheritance~~ done
+- ~~make Cython extension to use RedZone from Python~~ done
 - add install/setup scripts
+- add an ability to add custom functions in Python
+- add an ability to add custom tags in Python
