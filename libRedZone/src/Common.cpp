@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <ctype.h>
+#include <functional>
 
 #if defined( __linux__ ) || defined( __APPLE__ )
 #  include <unistd.h>

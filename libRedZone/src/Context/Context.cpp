@@ -7,8 +7,9 @@
 
 #include "Context.h"
 
-#include <regex>
+#include <cmath>
 #include <iostream>
+#include <regex>
 
 #include <Common.h>
 #include <Exception/JsonError.h>
