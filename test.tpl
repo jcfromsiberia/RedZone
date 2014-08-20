@@ -1,5 +1,7 @@
 {# Testing inheritance #}
-{% extends base_test.tpl %}
+
+Before extends
+{% extends middle_test.tpl %}
 {% block mainContent %}
 {# Testing loop and condition tags #}
 {% for item in items %}
@@ -26,6 +28,10 @@
 {{ get( numbers, "foo" ) }} should be null
 {{ ( 2 + 2 ) * (2 + 2) }} should be 16
 {{ 2 + " + 2 = 4" }} should be 2 + 2 = 4
+{{ contains( "item1", { "item2": [ 2 ], "item1": "str" } ) }} should be true
+{{ contains( 2, [ 1, 1, 1, 2, 3, 3 ] ) }} should be true
+{{ contains( "ada", "abracadabra" ) }} should be true
+{{ to_json( { "key1": "value1", "key2": [ 2, 4, 6] } ) }} should be { "key1": "value1", "key2": [ 2, 4, 6] }
 
 {# Testing include tag #}
 {% if true %}
@@ -36,5 +42,5 @@
 
 {% endblock %}
 
-This text shold not be here!
+This text should not be here!
 {% endextends %}

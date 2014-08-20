@@ -54,7 +54,8 @@ Context::Context()
                }
             };
             decltype( possibleOperations )::const_iterator foundOperation;
-            if( ( foundOperation = possibleOperations.find( std::make_tuple( lhs.type(), rhs.type() ) ) ) == possibleOperations.end() ) {
+            if( ( foundOperation = possibleOperations.find(
+                     std::make_tuple( lhs.type(), rhs.type() ) ) ) == possibleOperations.end() ) {
                throw Exception( "Type mismatch: can not add " + lhs.dump() + " to " + rhs.dump() );
             }
             return foundOperation->second( lhs, rhs );
@@ -70,7 +71,8 @@ Context::Context()
                }
             };
             decltype( possibleOperations )::const_iterator foundOperation;
-            if( ( foundOperation = possibleOperations.find( std::make_tuple( lhs.type(), rhs.type() ) ) ) == possibleOperations.end() ) {
+            if( ( foundOperation = possibleOperations.find(
+                     std::make_tuple( lhs.type(), rhs.type() ) ) ) == possibleOperations.end() ) {
                throw Exception( "Type mismatch: can not subtract " + lhs.dump() + " from " + rhs.dump() );
             }
             return foundOperation->second( lhs, rhs );
@@ -99,7 +101,8 @@ Context::Context()
             };
 
             decltype( possibleOperations )::const_iterator foundOperation;
-            if( ( foundOperation = possibleOperations.find( std::make_tuple( lhs.type(), rhs.type() ) ) ) == possibleOperations.end() ) {
+            if( ( foundOperation = possibleOperations.find(
+                     std::make_tuple( lhs.type(), rhs.type() ) ) ) == possibleOperations.end() ) {
                throw Exception( "Type mismatch: can not multiply " + lhs.dump() + " and " + rhs.dump() );
             }
             return foundOperation->second( lhs, rhs );
@@ -114,7 +117,8 @@ Context::Context()
                }
             };
             decltype( possibleOperations )::const_iterator foundOperation;
-            if( ( foundOperation = possibleOperations.find( std::make_tuple( lhs.type(), rhs.type() ) ) ) == possibleOperations.end() ) {
+            if( ( foundOperation = possibleOperations.find(
+                     std::make_tuple( lhs.type(), rhs.type() ) ) ) == possibleOperations.end() ) {
                throw Exception( "Type mismatch: can not divide " + lhs.dump() + " by " + rhs.dump() );
             }
             return foundOperation->second( lhs, rhs );
@@ -221,6 +225,30 @@ Context::Context()
             std::string result;
             std::transform( arg.begin(), arg.end(), std::back_inserter( result ), ::toupper );
             return Json( result );
+         } },
+         { "contains", []( std::vector< Json > const & args ) -> Json {
+            ARGS_SIZE_CHECK( 2 );
+            bool result = false;
+            if( args[ 0 ].is_string() && args[ 1 ].is_object() ) {
+               if( args[ 1 ][ args[ 0 ].string_value() ].type() != Json::NUL ) {
+                  result = true;
+               }
+            }
+            else if ( args[ 0 ].is_string() && args[ 1 ].is_string() ) {
+               result = args[ 1 ].string_value().find( args[ 0 ].string_value() ) != std::string::npos;
+            }
+            else if ( args[ 1 ].is_array() ) {
+               auto arrayItems = args[ 1 ].array_items();
+               result = std::find( arrayItems.begin(), arrayItems.end(), args[ 0 ] ) != arrayItems.end();
+            }
+            else {
+               throw Exception( "Can not find appropriate signature" );
+            }
+            return Json( result );
+         } },
+         { "to_json", []( std::vector< Json > const & args ) -> Json {
+            ARGS_SIZE_CHECK( 1 );
+            return Json( args[ 0 ].dump() );
          } }
       } ) {
 
