@@ -8,6 +8,7 @@
 
 #include <fstream>
 #include <iterator>
+#include <string>
 
 #include "Reader.h"
 
@@ -19,11 +20,13 @@ public:
 
    virtual std::string read( size_t nBytes );
    virtual std::string readAll();
+   virtual std::string id() const;
 
    virtual ~FileReader();
 
 protected:
    std::ifstream m_file;
+   std::string m_path;
 
 private:
    FileReader( FileReader const & ) { }

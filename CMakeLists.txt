@@ -23,6 +23,7 @@ target_link_libraries(RedZoneTest RedZone)
 configure_file(test.tpl test.tpl COPYONLY)
 configure_file(inc_test.tpl inc_test.tpl COPYONLY)
 configure_file(test.json test.json COPYONLY)
+configure_file(base_test.tpl base_test.tpl COPYONLY)
 
 
 # building language extension

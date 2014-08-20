@@ -18,6 +18,7 @@ public:
 
    virtual std::string read( size_t nBytes );
    virtual std::string readAll();
+   virtual std::string id() const;
 
    virtual ~StringReader();
 

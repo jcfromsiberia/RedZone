@@ -54,8 +54,21 @@ void ExtendsNode::processFragment( Fragment const * fragment ) {
 void ExtendsNode::exitScope( std::string const & endTag ) {
    if( endTag != "endextends" )
       throw TemplateSyntaxError( endTag );
-   std::vector< std::shared_ptr< BlockNode > > blocks( childrenByName< BlockNode >( "Block" ) );
-   for( std::shared_ptr< Node > node: m_parentRoot->children() ) {
+
+   auto extendsNodes = m_parentRoot->childrenByName< ExtendsNode >( name() );
+   if( extendsNodes.size() > 1 )
+      throw Exception( "Parent template has more than one 'extends' blocks" );
+   if( extendsNodes.size() && m_parentRoot->children()[ 0 ]->name() != name() )
+      throw Exception( "Extends node must be the first in " + m_parentRoot->id() );
+   std::vector< std::shared_ptr< Node > > parentChildNodes;
+   if( extendsNodes.size() ) {
+      parentChildNodes = extendsNodes[ 0 ]->m_nodesToRender;
+   }
+   else {
+      parentChildNodes = m_parentRoot->children();
+   }
+   auto blocks = childrenByName< BlockNode >( "Block" );
+   for( std::shared_ptr< Node > node: parentChildNodes ) {
       if( node->name() == "Block" ) {
          std::shared_ptr< BlockNode > blockNode = std::dynamic_pointer_cast< BlockNode >( node );
          std::string blockName = blockNode->blockName();

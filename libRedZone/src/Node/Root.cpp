@@ -9,8 +9,8 @@
 
 namespace RedZone {
 
-Root::Root()
-    : Node() {
+Root::Root( std::string id )
+    : Node(), m_id( id ) {
 
 }
 

@@ -83,7 +83,7 @@ Root * Parser::loadFromStream( Reader * stream ) const {
       fragments.push_back( std::shared_ptr< Fragment >( new Fragment( *iter ) ) );
    }
 
-   Root * root( new Root() );
+   Root * root( new Root( stream->id() ) );
 
    std::stack< Node * > scopeStack;
    scopeStack.push( root );

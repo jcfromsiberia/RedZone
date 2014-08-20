@@ -10,7 +10,7 @@
 namespace RedZone {
 
 FileReader::FileReader( std::string const & fileName )
-   : m_file( fileName ) {
+   : m_file( fileName ), m_path( fileName ) {
    if( !m_file.good() ) {
       throw IOError( "Can not open " + fileName + " file." );
    }
@@ -24,6 +24,10 @@ std::string FileReader::read( size_t nBytes ) {
 
 std::string FileReader::readAll() {
    return std::string( std::istreambuf_iterator< char >( m_file ), std::istreambuf_iterator< char >() );
+}
+
+std::string FileReader::id() const {
+    return m_path;
 }
 
 FileReader::~FileReader() {

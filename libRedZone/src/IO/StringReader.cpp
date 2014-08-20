@@ -21,6 +21,10 @@ std::string StringReader::readAll() {
    return m_string;
 }
 
+std::string StringReader::id() const {
+    return "<string>";
+}
+
 StringReader::~StringReader() {
 }
 
