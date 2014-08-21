@@ -26,7 +26,7 @@ public:
 
 protected:
     std::string m_container;
-    std::string m_var;
+    std::vector< std::string > m_vars;
 };
 
 } /* namespace RedZone */
