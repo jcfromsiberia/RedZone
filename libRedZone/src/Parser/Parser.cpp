@@ -35,7 +35,7 @@ const std::map<
         > Parser::s_nodeCreators {
     { R"(^if\s+.*$)",                                 []() { return new IfNode();   } },
     { R"(^else$)",                                    []() { return new ElseNode(); } },
-    { R"(^for\s+\w+\s+in\s+.+$)",                     []() { return new EachNode(); } },
+    { R"(^for\s+\w[a-zA-Z0-9 _,]* \s*in\s+.+$)",      []() { return new EachNode(); } },
     { R"(^include\s+.+$)",                            []() { return new IncludeNode(); } },
     { R"(^block\s+\w+$)",                             []() { return new BlockNode(); } },
     { R"(^extends\s+.+$)",                            []() { return new ExtendsNode(); } },

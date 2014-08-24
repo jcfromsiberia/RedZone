@@ -27,41 +27,30 @@ EachNode::EachNode()
 void EachNode::render( Writer * stream, Context * context ) const {
    ExpressionParser parser( context );
    Json container = parser.parse( m_container );
-   if( !( container.is_array() || container.is_object() || container.is_string() ) ) {
+   if( !( container.is_array() || container.is_object() ) ) {
       throw Exception( container.dump() + " is not iterable" );
    }
-   Json::array items = container.array_items();
 
    Json::object prototype = context->json().object_items();
 
    std::shared_ptr< Context > newContext( new Context( prototype ) );
-
-   for( auto item: items ) {
-      if( m_vars.size() > 1 ) {
-         if( item.is_array() ) {
-            auto itemItems = item.array_items();
-            auto itemsIter = itemItems.begin();
-            std::for_each( m_vars.begin(), m_vars.end(), [ & ]( std::string varName ) {
-               if( itemsIter != itemItems.end() ) {
-                  prototype[ varName ] = * itemsIter ++;
-               }
-               else {
-                  prototype[ varName ] = Json();
-               }
-            } );
-         } else if( item.is_object() ) {
-
-         } else if( item.is_string() ) {
-
-         } else {
-            throw Exception( "Can not extract values from " + item.dump() );
+   if( container.type() == Json::ARRAY ) {
+      Json::array items = container.array_items();
+      for( auto const & item: items ) {
+         prototype[ m_vars[ 0 ] ] = item;
+         newContext->setJson( Json( prototype ) );
+         renderChildren( stream, newContext.get() );
+      }
+   } else if( container.type() == Json::OBJECT ) {
+      Json::object items = container.object_items();
+      for( auto const & item: items ) {
+         prototype[ m_vars[ 0 ] ] = item.first;
+         if( m_vars.size() > 1 ) {
+            prototype[ m_vars[ 1 ] ] = item.second;
          }
+         newContext->setJson( Json( prototype ) );
+         renderChildren( stream, newContext.get() );
       }
-      else {
-          prototype[ m_vars[ 0 ] ] = item;
-      }
-      newContext->setJson( Json( prototype ) );
-      renderChildren( stream, newContext.get() );
    }
 }
 

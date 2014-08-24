@@ -40,6 +40,11 @@ Before extends
     {% include "Fake.tpl" %} 
 {% endif %}
 
+Numbers:
+{% for key,value in numbers %}
+   Key: {{ key }}, value: {{ value }}
+{% endfor %}
+
 {% endblock %}
 
 This text should not be here!
