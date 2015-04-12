@@ -11,7 +11,7 @@
 namespace RedZone
 {
 
-class ExpressionException : public Exception
+class RZ_API ExpressionException : public Exception
 {
 public:
    using Exception::Exception;

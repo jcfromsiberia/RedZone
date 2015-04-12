@@ -14,7 +14,7 @@
 
 namespace RedZone {
 
-class FileReader : public Reader {
+class RZ_API FileReader : public Reader {
 public:
    FileReader( std::string const & fileName );
 

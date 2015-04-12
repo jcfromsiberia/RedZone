@@ -25,6 +25,10 @@
 #include <cstdio>
 #include <limits>
 
+#ifdef _MSC_VER
+#define snprintf _snprintf
+#endif
+
 namespace json11 {
 
 static const int max_depth = 200;
@@ -218,6 +222,7 @@ struct Statics {
     const string empty_string;
     const vector<Json> empty_vector;
     const map<string, Json> empty_map;
+    Statics() {}
 };
 
 const Statics & statics() {
@@ -235,18 +240,18 @@ const Json & static_null() {
  * Constructors
  */
 
-Json::Json() noexcept                  : m_ptr(statics().null) {}
-Json::Json(std::nullptr_t) noexcept    : m_ptr(statics().null) {}
-Json::Json(double value)               : m_ptr(make_shared<JsonDouble>(value)) {}
-Json::Json(int value)                  : m_ptr(make_shared<JsonInt>(value)) {}
-Json::Json(bool value)                 : m_ptr(value ? statics().t : statics().f) {}
-Json::Json(const string &value)        : m_ptr(make_shared<JsonString>(value)) {}
-Json::Json(string &&value)             : m_ptr(make_shared<JsonString>(move(value))) {}
-Json::Json(const char * value)         : m_ptr(make_shared<JsonString>(value)) {}
-Json::Json(const Json::array &values)  : m_ptr(make_shared<JsonArray>(values)) {}
-Json::Json(Json::array &&values)       : m_ptr(make_shared<JsonArray>(move(values))) {}
-Json::Json(const Json::object &values) : m_ptr(make_shared<JsonObject>(values)) {}
-Json::Json(Json::object &&values)      : m_ptr(make_shared<JsonObject>(move(values))) {}
+Json::Json() JSON11_NOEXCEPT                  : m_ptr(statics().null) {}
+Json::Json(std::nullptr_t) JSON11_NOEXCEPT    : m_ptr(statics().null) {}
+Json::Json(double value)                      : m_ptr(make_shared<JsonDouble>(value)) {}
+Json::Json(int value)                         : m_ptr(make_shared<JsonInt>(value)) {}
+Json::Json(bool value)                        : m_ptr(value ? statics().t : statics().f) {}
+Json::Json(const string &value)               : m_ptr(make_shared<JsonString>(value)) {}
+Json::Json(string &&value)                    : m_ptr(make_shared<JsonString>(move(value))) {}
+Json::Json(const char * value)                : m_ptr(make_shared<JsonString>(value)) {}
+Json::Json(const Json::array &values)         : m_ptr(make_shared<JsonArray>(values)) {}
+Json::Json(Json::array &&values)              : m_ptr(make_shared<JsonArray>(move(values))) {}
+Json::Json(const Json::object &values)        : m_ptr(make_shared<JsonObject>(values)) {}
+Json::Json(Json::object &&values)             : m_ptr(make_shared<JsonObject>(move(values))) {}
 
 /* * * * * * * * * * * * * * * * * * * *
  * Accessors
@@ -692,3 +697,7 @@ bool Json::has_shape(const shape & types, string & err) const {
 }
 
 } // namespace json11
+
+#ifdef _MSC_VER
+#undef snprintf
+#endif

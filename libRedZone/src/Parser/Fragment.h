@@ -12,7 +12,7 @@
 
 namespace RedZone {
 
-class Fragment {
+class RZ_API Fragment {
 public:
     Fragment( std::string const & rawText );
 

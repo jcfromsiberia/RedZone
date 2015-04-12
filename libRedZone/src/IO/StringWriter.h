@@ -12,7 +12,7 @@
 
 namespace RedZone {
 
-class StringWriter : public Writer {
+class RZ_API StringWriter : public Writer {
 public:
    StringWriter( std::string & string );
 

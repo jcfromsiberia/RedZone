@@ -15,7 +15,7 @@ namespace RedZone {
 
 class Writer;
 
-class IfNode: public Node {
+class RZ_API IfNode: public Node {
 public:
 
     IfNode();

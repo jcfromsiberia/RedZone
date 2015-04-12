@@ -13,7 +13,7 @@ namespace RedZone {
 
 class Writer;
 
-class ElseNode: public Node {
+class RZ_API ElseNode: public Node {
 public:
     ElseNode();
 

@@ -12,7 +12,7 @@ namespace RedZone {
 
 class Root;
 
-class ExtendsNode : public Node {
+class RZ_API ExtendsNode : public Node {
 public:
    ExtendsNode();
 

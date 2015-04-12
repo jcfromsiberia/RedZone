@@ -47,6 +47,10 @@ if(DEFINED BUILD_LANG_EXTENSION)
         
         configure_file(cython/test.py test.py COPYONLY)
         
+	if(WIN32)
+		#add_definitions(-DMS_NO_COREDLL)
+	endif(WIN32)
+        
     endif(${BUILD_LANG_EXTENSION} MATCHES "python")
     
     # TODO: add extensions for other languages

@@ -11,7 +11,7 @@
 
 namespace RedZone {
 
-class TemplateContextError: public Exception {
+class RZ_API TemplateContextError: public Exception {
 public:
     TemplateContextError( std::string const & contextVar );
     virtual ~TemplateContextError();

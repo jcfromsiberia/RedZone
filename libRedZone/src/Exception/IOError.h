@@ -11,7 +11,7 @@
 
 namespace RedZone {
 
-class IOError: public RedZone::Exception {
+class RZ_API IOError: public RedZone::Exception {
 public:
     IOError( std::string const & message );
     virtual ~IOError();

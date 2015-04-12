@@ -69,7 +69,8 @@ void IncludeNode::render( Writer * stream, Context * context ) const {
 void IncludeNode::processFragment( Fragment const * fragment ) {
    static std::regex splitter( R"(^include\s+(.+))" );
    std::smatch match;
-   if( !std::regex_match( fragment->clean(), match, splitter ) ) {
+   std::string cleaned = fragment->clean();
+   if( !std::regex_match( cleaned, match, splitter ) ) {
          throw TemplateSyntaxError( fragment->clean() );
    }
    m_includeExpr = match[ 1 ];

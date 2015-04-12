@@ -99,7 +99,7 @@ cdef extern from "<Template/Template.h>" namespace "RedZone":
 
 cdef extern from "<Template/FileTemplate.h>" namespace "RedZone":
     cdef cppclass CFileTemplate "RedZone::FileTemplate" ( CTemplate ):
-        CFileTemplate( string fileName )
+        CFileTemplate( string & fileName )
 
 
 # class wrapping

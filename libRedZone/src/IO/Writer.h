@@ -8,9 +8,11 @@
 
 #include <string>
 
+#include <Export.h>
+
 namespace RedZone {
 
-class Writer {
+class RZ_API Writer {
 public:
    virtual void write( std::string const & data ) = 0;
    virtual void flush() = 0;

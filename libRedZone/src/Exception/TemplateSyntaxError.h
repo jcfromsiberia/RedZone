@@ -11,7 +11,7 @@
 
 namespace RedZone {
 
-class TemplateSyntaxError: public Exception {
+class RZ_API TemplateSyntaxError: public Exception {
 public:
     TemplateSyntaxError( std::string const & wrongSyntax );
     virtual ~TemplateSyntaxError();

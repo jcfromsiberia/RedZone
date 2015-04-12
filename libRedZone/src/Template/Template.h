@@ -32,7 +32,6 @@ protected:
 
 protected:
 	std::shared_ptr< Root const > m_root;
-
 };
 
 } /* namespace RedZone */

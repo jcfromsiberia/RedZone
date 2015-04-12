@@ -10,7 +10,7 @@
 
 namespace RedZone {
 
-class BlockNode : public Node {
+class RZ_API BlockNode : public Node {
 public:
    BlockNode();
 

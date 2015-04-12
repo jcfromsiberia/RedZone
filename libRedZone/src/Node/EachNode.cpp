@@ -57,7 +57,8 @@ void EachNode::render( Writer * stream, Context * context ) const {
 void EachNode::processFragment( Fragment const * fragment ) {
    static std::regex const splitter( R"(^for\s+(\w[a-zA-Z0-9 _,]*) \s*in\s+(.+)$)" );
    std::smatch match;
-   if( !std::regex_match( fragment->clean(), match, splitter ) ) {
+   std::string cleaned = fragment->clean();
+   if( !std::regex_match( cleaned, match, splitter ) ) {
       throw TemplateSyntaxError( fragment->clean() );
    }
    std::string vars = match[ 1 ];

@@ -33,11 +33,11 @@ void ExtendsNode::render( Writer * stream, Context * context ) const {
 void ExtendsNode::processFragment( Fragment const * fragment ) {
    static std::regex const splitter( R"(^extends\s+(.+)$)" );
    std::smatch match;
-   if( !std::regex_match( fragment->clean(), match, splitter ) ) {
+   std::string cleaned = fragment->clean();
+   if( ! std::regex_match( cleaned, match, splitter ) ) {
       throw TemplateSyntaxError( fragment->clean() );
    }
    std::string path = match[ 1 ];
-
    std::vector< std::string > const & allParserPaths = Parser::paths();
    auto found = std::find_if( allParserPaths.begin(), allParserPaths.end(),
       std::bind( &isReadableFile, std::bind(

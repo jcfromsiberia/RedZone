@@ -12,7 +12,7 @@
 
 namespace RedZone {
 
-class StringReader : public Reader {
+class RZ_API StringReader : public Reader {
 public:
    StringReader( std::string const & string );
 

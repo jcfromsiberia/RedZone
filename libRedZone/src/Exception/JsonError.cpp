@@ -9,7 +9,7 @@
 namespace RedZone {
 
 JsonError::~JsonError() {
-    // TODO Auto-generated destructor stub
+    
 }
 
 } /* namespace RedZone */

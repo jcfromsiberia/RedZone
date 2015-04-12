@@ -6,6 +6,20 @@
 
 #pragma once
 
+#if defined( __linux__ )
+#  define RZ_LINUX
+#elif defined( __APPLE__ )
+#  define RZ_MACOS
+#elif defined( _WIN32 ) || defined( _WIN64 )
+#  define RZ_WINDOWS
+#else
+#  error "Unknown OS"
+#endif
+
+#if defined( RZ_LINUX ) || defined( RZ_MACOS )
+	define RZ_UNIX
+#endif
+
 #include <string>
 
 namespace RedZone {

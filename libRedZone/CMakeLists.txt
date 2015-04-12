@@ -82,4 +82,6 @@ else(BUILD_RZ_SHARED)
     message(STATUS "Building static library")
 endif(BUILD_RZ_SHARED)
 
+add_definitions(-DRZ_EXPORTS)
+
 add_library(RedZone ${RZ_LIBRARY_TYPE} ${RZ_SOURCES})

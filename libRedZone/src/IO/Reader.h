@@ -8,9 +8,11 @@
 
 #include <string>
 
+#include <Export.h>
+
 namespace RedZone {
 
-class Reader {
+class RZ_API Reader {
 public:
    virtual std::string read( size_t nBytes ) = 0;
    virtual std::string readAll() = 0;

@@ -12,7 +12,7 @@
 
 namespace RedZone {
 
-class FileWriter : public Writer {
+class RZ_API FileWriter : public Writer {
 public:
    FileWriter( std::string const & fileName );
 
