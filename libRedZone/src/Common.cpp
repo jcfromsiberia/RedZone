@@ -38,9 +38,9 @@ std::string dbl2str( double d ) {
 
 void trimString( std::string & str ) {
    str.erase( str.begin(), std::find_if( str.begin(), str.end(),
-           std::not1( std::ptr_fun< int, int >( isspace ) ) ) );
+           std::not1( std::function< int( int ) >( isspace ) ) ) );
    str.erase( std::find_if( str.rbegin(), str.rend(),
-           std::not1( std::ptr_fun< int, int >( isspace ) ) ).base(), str.end() );
+           std::not1( std::function< int( int ) >( isspace ) ) ).base(), str.end() );
 }
 
 std::string replaceString( std::string subject, const std::string & search, const std::string & replace ) {

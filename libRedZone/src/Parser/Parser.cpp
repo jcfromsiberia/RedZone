@@ -17,6 +17,7 @@
 #include <Exception/TemplateSyntaxError.h>
 #include <IO/Reader.h>
 #include <Node/BlockNode.h>
+#include <Node/CacheNode.h>
 #include <Node/EachNode.h>
 #include <Node/ElseNode.h>
 #include <Node/ExtendsNode.h>
@@ -33,12 +34,13 @@ namespace RedZone {
 const std::map<
         std::string, std::function< Node * () >
         > Parser::s_nodeCreators {
-    { R"(^if\s+.*$)",                                 []() { return new IfNode();   } },
-    { R"(^else$)",                                    []() { return new ElseNode(); } },
-    { R"(^for\s+\w[a-zA-Z0-9 _,]* \s*in\s+.+$)",      []() { return new EachNode(); } },
+    { R"(^if\s+.*$)",                                 []() { return new IfNode();      } },
+    { R"(^else$)",                                    []() { return new ElseNode();    } },
+    { R"(^for\s+\w[a-zA-Z0-9 _,]* \s*in\s+.+$)",      []() { return new EachNode();    } },
     { R"(^include\s+.+$)",                            []() { return new IncludeNode(); } },
-    { R"(^block\s+\w+$)",                             []() { return new BlockNode(); } },
+    { R"(^block\s+\w+$)",                             []() { return new BlockNode();   } },
     { R"(^extends\s+.+$)",                            []() { return new ExtendsNode(); } },
+    { R"(^cache\s+\d+\s+.+)",                         []() { return new CacheNode();   } },
 };
 
 std::vector< std::string > Parser::s_paths { "./", };
@@ -80,7 +82,7 @@ Root * Parser::loadFromStream( Reader * stream ) const {
       if( !( *iter ).length() ) {
           continue;
       }
-      fragments.push_back( std::shared_ptr< Fragment >( new Fragment( *iter ) ) );
+      fragments.push_back( std::make_shared< Fragment >( *iter ) );
    }
 
    Root * root( new Root( stream->id() ) );

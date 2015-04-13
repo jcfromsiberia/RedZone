@@ -45,6 +45,10 @@ Numbers:
    Key: {{ key }}, value: {{ value }}
 {% endfor %}
 
+{# Testing cache #}
+
+{% cache 5000 "TestCache" %}{{ random(20, 100500) }}{% endcache %} should be {% cache 5000 "TestCache" %}{{ random(20, 100500) }}{% endcache %} cached
+
 {% endblock %}
 
 This text should not be here!

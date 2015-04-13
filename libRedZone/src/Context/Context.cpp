@@ -9,6 +9,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <random>
 #include <regex>
 
 #include <Common.h>
@@ -249,9 +250,28 @@ Context::Context()
          { "to_json", []( std::vector< Json > const & args ) -> Json {
             ARGS_SIZE_CHECK( 1 );
             return Json( args[ 0 ].dump() );
-         } }
+         } },
+         { "random", []( std::vector< Json > const & args ) -> Json {
+            ARGS_SIZE_CHECK( 2 );
+            if( ! args[ 0 ].is_number() || ! args[ 1 ].is_number() ) {
+               throw Exception( "Function accepts only numeric arguments" );
+            }
+            int a = int( args[ 0 ].number_value() ),
+                b = int( args[ 1 ].number_value() );
+            if( a == b )
+            {
+               return Json( a );
+            }
+            if( a > b )
+            {
+               std::swap( a, b );
+            }
+            std::random_device seed;
+            std::default_random_engine generator( seed() );
+            std::uniform_int_distribution< int > distribution( a, b );
+            return Json( distribution( generator ) );
+         } },
       } ) {
-
 }
 
 Context::Context( std::string const & json )
