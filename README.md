@@ -107,8 +107,8 @@ So, having this markup in `/tmp/test.tpl`:
 	<div class="active">{{ item.text }}</div>
     {% else  %}
 	<div class="inactive">{{ item.text }}</div>
-    {% end  %}
-{% end %}
+    {% endif  %}
+{% endfor %}
 
 // Testing expression parser
 {{ "f" * 8 + "u" * 8 + "~" }} should be ffffffffuuuuuuuu~
@@ -125,6 +125,8 @@ So, having this markup in `/tmp/test.tpl`:
 {{ get( numbers, "third" ) }} should be true
 {{ get( numbers, "foo" ) }} should be null
 {{ ( 2 + 2 ) * (2 + 2) }} should be 16
+
+{% cache 5000 "TestCache" items %}{{ random(20, 100500) }}{% endcache %} should be {% cache 5000 "TestCache" items %}{{ random(20, 100500) }}{% endcache %} cached
 
 ```
 and the context which is represented above , we will get this output:
@@ -159,6 +161,7 @@ true should be true
 null should be null
 16 should be 16
 
+95199 should be 95199 cached
 ```
 
 ## Detailed description
