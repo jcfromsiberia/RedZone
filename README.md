@@ -168,13 +168,14 @@ null should be null
 ### Functions
 | Function name | Arguments  | Return value |
 | :-----------: | :--------- | :----------- |
-| sin           | `val` numeric | (numberic) sine of `val` radians |
-| cos           | `val` numeric | (numberic) cosine of `val` radians |
-| length        | `val` string or array or object | (numberic) length value of `val` Json object |
+| sin           | `val` numeric | (numeric) sine of `val` radians |
+| cos           | `val` numeric | (numeric) cosine of `val` radians |
+| length        | `val` string or array or object | (numeric) length value of `val` Json object |
 | not           | `val` bool | (bool) not `val` |
-| get           | `val` string or array or object<br>`key` string or numeric | (any value or null) child item of `val` by `key` |
+| get           | `val` string or array or object<br/>`key` string or numeric | (any value or null) child item of `val` by `key` |
 | lower         | `val` string | (string) lowered `val` |
 | upper         | `val` string | (string) uppered `val` |
+| random        | `a`   numeric<br/>`b` numeric | (numeric) random number value in range [a, b] |
 
 ### Binary operators
 | Operator | Left value | Right value | Return value |
