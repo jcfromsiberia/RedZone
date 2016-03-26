@@ -22,44 +22,54 @@ class Writer;
 
 class RZ_API Node {
 public:
-	virtual void render( Writer * stream, Context * context ) const;
+   using NodePtr  = std::shared_ptr< Node >;
+   using NodeCPtr = std::shared_ptr< Node >;
 
-	void renderChildren( Writer * stream, Context * context,
-	        std::vector< std::shared_ptr< Node > > children = { } ) const;
+   using Nodes    = std::vector< NodePtr >;
 
-	virtual void processFragment( Fragment const * fragment );
-	void addChild( Node * child );
+   virtual void render( Writer * stream, Context * context ) const;
 
-	bool createsScope() const;
+   void renderChildren( Writer * stream, Context * context,
+      Nodes children = { } ) const;
+
+   virtual void processFragment( Fragment const * fragment );
+   void addChild( Node * child );
+
+   bool createsScope() const;
 
    virtual void enterScope();
    virtual void exitScope( std::string const & endTag );
 
    virtual std::string name() const;
 
-   std::vector< std::shared_ptr< Node > > const & children();
+   Nodes const & children();
 
    template< class T >
-   std::vector< std::shared_ptr< T > > childrenByName( std::string const & name ) {
-      std::vector< std::shared_ptr< Node > > nodes;
-      std::copy_if( m_children.begin(), m_children.end(), std::back_inserter( nodes ),
-         std::bind( std::equal_to< std::string >(), std::bind( &Node::name, std::placeholders::_1 ), name ) );
-      std::vector< std::shared_ptr< T > > result;
-      typedef std::shared_ptr< T >( *DynamicPointerCast )( std::shared_ptr< Node > const & );
-      DynamicPointerCast caster = std::dynamic_pointer_cast< T >;
-      std::transform( nodes.begin(), nodes.end(), std::back_inserter( result ), caster );
+   std::vector< std::weak_ptr< T > > childrenByName( std::string const & name ) {
+      using namespace std;
+      Nodes nodes;
+      using ResultNode = weak_ptr< T >;
+      using ResultNodes = vector< ResultNode >;
+
+      copy_if( m_children.begin(), m_children.end(), back_inserter( nodes ),
+         bind( equal_to< string >(), bind( &Node::name, placeholders::_1 ), name ) );
+      ResultNodes result;
+      for( auto & node : nodes )
+      {
+         result.push_back( weak_ptr< T >( dynamic_pointer_cast< T >( node ) ) );
+      }
       return result;
    }
 
-	virtual ~Node();
+   virtual ~Node();
 
 protected:
-	Node( bool createsScope = false );
-	virtual json11::Json resolveInContext( std::string const & name, Context const * context ) const;
+   Node( bool createsScope = false );
+   virtual json11::Json resolveInContext( std::string const & name, Context const * context ) const;
 
 protected:
-	std::vector< std::shared_ptr< Node > > m_children;
-	bool m_createsScope;
+   Nodes m_children;
+   bool m_createsScope;
 };
 
 } /* namespace RedZone */

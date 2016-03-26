@@ -9,6 +9,7 @@
 #include <math.h>
 #include <regex>
 #include <set>
+#include <stack>
 #include <vector>
 
 #include <Common.h>
@@ -19,11 +20,13 @@
 #define MIN_PRIORITY 0
 #define MAX_PRIORITY 3
 #define ARGS_SIZE_CHECK(SIZE) if( args.size() != SIZE ) { \
-   throw Exception( "Got " + std::to_string( args.size() ) + \
-                    " arguments, expected " + std::to_string( SIZE ) ); \
+   throw Exception( "Got " + to_string( args.size() ) + \
+                    " arguments, expected " + to_string( SIZE ) ); \
    }
 
 using namespace json11;
+
+using namespace std;
 
 namespace RedZone
 {
@@ -33,26 +36,61 @@ ExpressionParser::ExpressionParser( Context const * context )
 {
    auto binaryOperators = m_context->binaryOperators();
    for( auto i = binaryOperators.begin(); i != binaryOperators.end(); ++i ) {
-      std::string opString = std::get< 0 >( *i );
-      std::copy( opString.begin(), opString.end(), std::inserter( m_binaryOperatorChars, m_binaryOperatorChars.begin() ) );
+      string opString = get< 0 >( *i );
+      copy( opString.begin(), opString.end(), inserter( m_binaryOperatorChars, m_binaryOperatorChars.begin() ) );
    }
 }
 
-Json ExpressionParser::parse( std::string expression ) const {
+Json ExpressionParser::parse( string expression ) const {
    {
-      // validating
-      // FIXME: do not count brackets between quotes
-      static std::vector< std::tuple< std::string, char, char > > const validationData {
-         std::make_tuple( "Parentheses mismatch", '(', ')' ),
-         std::make_tuple( "Square brackets mismatch", '[', ']' ),
-         std::make_tuple( "Braces mismatch", '{', '}' ),
-         std::make_tuple( "Quotes mismatch", '"', '"' ),
+      struct ValidatorData
+      {
+         string errorMessage;
+         char open;
+         char close;
       };
-      for( auto data: validationData ) {
-         if( std::count( expression.begin(), expression.end(), std::get< 1 >( data ) ) !=
-             std::count( expression.begin(), expression.end(), std::get< 2 >( data ) ) ) {
-            throw ExpressionException( expression, std::get< 0 >( data ) );
+      // validating
+      static vector< ValidatorData > const validationData {
+         ValidatorData{ "Parentheses mismatch", '(', ')' },
+         ValidatorData{ "Square brackets mismatch", '[', ']' },
+         ValidatorData{ "Braces mismatch", '{', '}' },
+      };
+      stack< char > scope;
+      bool betweenQuotes = false;
+      string errorMessage;
+      for( auto chr: expression ) {
+         if( chr == '\"' ) {
+            betweenQuotes = !betweenQuotes;
+            continue;
          }
+
+         if( betweenQuotes ) {
+            continue;
+         }
+
+         auto matchingValidator = find_if( begin( validationData ), end( validationData ), 
+            [ chr ]( auto && data ) {
+            return data.open == chr || data.close == chr;
+            } );
+
+         if( matchingValidator != validationData.end() ) {
+            if( chr == matchingValidator->open ) {
+               scope.push( chr );
+               errorMessage = matchingValidator->errorMessage;
+               continue;
+            }
+            // chr == matchingValidator->close
+            // TODO add assert!
+            if( scope.top() == matchingValidator->open ) {
+               scope.pop();
+            }
+         }
+      }
+      if( betweenQuotes ) {
+         throw ExpressionException( expression, "Quotes mismatch" );
+      }
+      if( !scope.empty() ) {
+         throw ExpressionException( expression, errorMessage );
       }
    }
 
@@ -61,14 +99,13 @@ Json ExpressionParser::parse( std::string expression ) const {
       result = parseRecursive( expression );
    }
    catch( Exception const & ex ) {
-      throw ExpressionException( expression, std::string( " occurred an exception " ) + ex.what() );
+      throw ExpressionException( expression, string( " occurred an exception " ) + ex.what() );
    }
    return result;
 }
 
-Json ExpressionParser::parseRecursive( std::string expression ) const {
-
-   std::string err;
+Json ExpressionParser::parseRecursive( string expression ) const {
+   string err;
 
    // trying to convert the expression to json
    Json result = Json::parse( expression, err );
@@ -79,9 +116,9 @@ Json ExpressionParser::parseRecursive( std::string expression ) const {
    trimString( expression );
 
    // perhaps that's a variable
-   static std::regex const variableRegex( R"(^[a-zA-Z][a-zA-Z0-9\.]*$)" );
-   std::smatch match;
-   if( std::regex_match( expression, match, variableRegex ) ) {
+   static regex const variableRegex( R"(^[a-zA-Z][a-zA-Z0-9\.]*$)" );
+   smatch match;
+   if( regex_match( expression, match, variableRegex ) ) {
       try {
          result = m_context->resolve( expression );
          return result;
@@ -117,16 +154,16 @@ Json ExpressionParser::parseRecursive( std::string expression ) const {
    // if the expression is a function call
 
    Context::Functions const & functions = m_context->functions();
-   static std::regex const funcRegex( R"(^(\w+)\s*\((.+)\)$)" );
-   std::smatch funcMatch;
-   if( std::regex_match( expression, funcMatch, funcRegex ) ) {
-      std::string funcName = funcMatch[ 1 ];
+   static regex const funcRegex( R"(^(\w+)\s*\((.+)\)$)" );
+   smatch funcMatch;
+   if( regex_match( expression, funcMatch, funcRegex ) ) {
+      string funcName = funcMatch[ 1 ];
       Context::Functions::const_iterator foundFunc;
       if( ( foundFunc = functions.find( funcName ) ) == functions.end() ) {
          throw ExpressionException( expression, "No such function: " + funcName );
       }
-      std::string argsString = funcMatch[ 2 ];
-      std::vector< Json > args;
+      string argsString = funcMatch[ 2 ];
+      vector< Json > args;
       int pcount = 0, qbcount = 0, bcount = 0;
       bool inQuotes = false;
       decltype( argsString )::const_iterator start = argsString.begin(), current = argsString.begin();
@@ -159,8 +196,8 @@ Json ExpressionParser::parseRecursive( std::string expression ) const {
          bool isInBrackets = pcount != 0 || qbcount != 0 || bcount != 0;
          bool nextIsEnd = current + 1 == argsString.end();
          if( !isInBrackets && ( *current == ',' || nextIsEnd ) ) {
-            std::string argExpr;
-            std::copy( start, current + ( nextIsEnd ? 1 : 0 ), std::back_inserter( argExpr ) );
+            string argExpr;
+            copy( start, current + ( nextIsEnd ? 1 : 0 ), back_inserter( argExpr ) );
             args.push_back( parseRecursive( argExpr ) );
             start = current + 1; // FIXME: oops, it's dangerous
          }
@@ -179,7 +216,7 @@ Json ExpressionParser::parseRecursive( std::string expression ) const {
    for( int priority = MIN_PRIORITY; priority <= MAX_PRIORITY; ++priority ) {
       int len = expression.length(), i = 0, pcount = 0;
       bool inQuotes = false;
-      std::string lhs, rhs;
+      string lhs, rhs;
       i = len - 1;
       while( i >= 0 ) {
          if( expression[ i ] == '"' ) {
@@ -196,10 +233,10 @@ Json ExpressionParser::parseRecursive( std::string expression ) const {
             pcount--;
          }
          auto finder = [ & ]( Context::BinaryOperators::value_type const & opData ) {
-            if( priority != std::get< 1 >( opData ) )
+            if( priority != get< 1 >( opData ) )
                return false;
-            std::string op = std::get< 0 >( opData );
-            std::string possibleOp;
+            string op = get< 0 >( opData );
+            string possibleOp;
             int sensor = i;
             for( ;
                sensor < expression.length() && m_binaryOperatorChars.find( expression[ sensor ] ) != m_binaryOperatorChars.end();
@@ -210,14 +247,14 @@ Json ExpressionParser::parseRecursive( std::string expression ) const {
          };
          Context::BinaryOperators::const_iterator opIter;
          if( !pcount && m_binaryOperatorChars.find( expression[ i ] ) != m_binaryOperatorChars.end() &&
-            ( opIter = std::find_if( binaryOperators.begin(), binaryOperators.end(), finder ) ) != binaryOperators.end() ) {
-            rhs = expression.substr( i + std::get< 0 >( *opIter ).length() );
+            ( opIter = find_if( binaryOperators.begin(), binaryOperators.end(), finder ) ) != binaryOperators.end() ) {
+            rhs = expression.substr( i + get< 0 >( *opIter ).length() );
             lhs = expression.substr( 0, i );
             try {
-               result = std::get< 2 >( *opIter )( parseRecursive( lhs ), parseRecursive( rhs ) );
+               result = get< 2 >( *opIter )( parseRecursive( lhs ), parseRecursive( rhs ) );
             }
             catch( Exception const & ex ) {
-               throw ExpressionException( expression, "operator " + std::get< 0 >( *opIter ) + " raised exception: " + ex.what() );
+               throw ExpressionException( expression, "operator " + get< 0 >( *opIter ) + " raised exception: " + ex.what() );
             }
             return result;
          }

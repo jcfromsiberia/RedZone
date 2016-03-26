@@ -3,7 +3,6 @@
  *
  *      Author: jc
  */
-
 #pragma once
 
 #if defined( __linux__ )
@@ -20,7 +19,10 @@
 	define RZ_UNIX
 #endif
 
+#include <memory>
 #include <string>
+
+#include <Exception/Exception.h>
 
 namespace RedZone {
 
@@ -33,7 +35,17 @@ void trimString( std::string & str );
 
 bool isReadableFile( std::string const & filePath );
 
-typedef std::string( *StrConcat )( std::string const &, std::string const & );
+using StrConcat = std::string( * )( std::string const &, std::string const & );
 static StrConcat strConcat = std::operator+;
+
+template< class T >
+std::shared_ptr< T > weakToShared( std::weak_ptr< T > weakPtr )
+{
+   if( std::shared_ptr< T > sharedPtr = weakPtr.lock() )
+   {
+      return sharedPtr;
+   }
+   throw Exception( "Failed to acquire an object" );
+}
 
 } /* namespace RedZone */

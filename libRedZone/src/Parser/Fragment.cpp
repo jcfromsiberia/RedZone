@@ -8,6 +8,7 @@
 #include "Fragment.h"
 
 #include <algorithm>
+#include <iterator>
 
 #include <Common.h>
 

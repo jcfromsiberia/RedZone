@@ -2,10 +2,10 @@ cmake_minimum_required (VERSION 2.6)
 
 project(RedZoneTest)
 
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
 	# turn on C++11 features
 	set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS} -g -ftest-coverage -fprofile-arcs")
-endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+endif(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
 
 set(RZT_SOURCES
     main.cpp
@@ -44,14 +44,16 @@ if(DEFINED BUILD_LANG_EXTENSION)
         )
         cython_add_module(PyRedZone cython/RedZone.pyx)
         target_link_libraries(PyRedZone RedZone)
+        target_link_libraries(PyRedZone ${PYTHON_LIBRARIES})
         set_target_properties(PyRedZone PROPERTIES PREFIX "")
         set_target_properties(PyRedZone PROPERTIES OUTPUT_NAME "RedZone")
         
         configure_file(cython/test.py test.py COPYONLY)
         
-	if(WIN32)
-		#add_definitions(-DMS_NO_COREDLL)
-	endif(WIN32)
+        if(WIN32)
+            # Prevent coercive linking to pythonXX.lib (via the preprocessor directive pragma comment(lib, ...))
+            # add_definitions(-DMS_NO_COREDLL)
+        endif(WIN32)
         
     endif(${BUILD_LANG_EXTENSION} MATCHES "python")
     

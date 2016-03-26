@@ -62,7 +62,7 @@ void ExtendsNode::exitScope( std::string const & endTag ) {
       throw Exception( "Extends node must be the first in " + m_parentRoot->id() );
    std::vector< std::shared_ptr< Node > > parentChildNodes;
    if( extendsNodes.size() ) {
-      parentChildNodes = extendsNodes[ 0 ]->m_nodesToRender;
+      parentChildNodes = weakToShared( extendsNodes[ 0 ] )->m_nodesToRender;
    }
    else {
       parentChildNodes = m_parentRoot->children();
@@ -73,10 +73,10 @@ void ExtendsNode::exitScope( std::string const & endTag ) {
          std::shared_ptr< BlockNode > blockNode = std::dynamic_pointer_cast< BlockNode >( node );
          std::string blockName = blockNode->blockName();
          auto found = std::find_if( blocks.begin(), blocks.end(),
-                         std::bind( std::equal_to< std::string >(),
-                            std::bind( &BlockNode::blockName, _1 ), blockName ) );
+            [ & ]( auto block ) -> bool { return blockName == weakToShared( block )->blockName(); } );
          if( found != blocks.end() ) {
-            m_nodesToRender.push_back( std::dynamic_pointer_cast< Node >( *found ) );
+            m_nodesToRender.push_back( 
+               std::dynamic_pointer_cast< Node >( weakToShared( * found ) ) );
             continue;
          }
          m_nodesToRender.push_back( node );

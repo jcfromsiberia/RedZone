@@ -6,6 +6,7 @@
  */
 
 #include <Context/Context.h>
+#include <Exception/Exception.h>
 #include <Template/FileTemplate.h>
 
 #include <fstream>
@@ -38,7 +39,12 @@ int main( int argc, char ** argv )
 
     RedZone::Context * cont( new RedZone::Context( json ) );
 
-    std::cout << tpl.render( cont ) << std::endl;
+    try {
+      std::cout << tpl.render( cont ) << std::endl;
+    }
+    catch( RedZone::Exception const & exception ) {
+      std::cerr << exception.what() << std::endl;
+    }
 
     return 0;
 }

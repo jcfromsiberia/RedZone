@@ -5,6 +5,8 @@
  */
 #include "StringWriter.h"
 
+#include <iterator>
+
 namespace RedZone {
 
 StringWriter::StringWriter( std::string & string )
