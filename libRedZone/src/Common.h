@@ -16,7 +16,7 @@
 #endif
 
 #if defined( RZ_LINUX ) || defined( RZ_MACOS )
-	define RZ_UNIX
+#	define RZ_UNIX
 #endif
 
 #include <memory>
